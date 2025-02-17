@@ -1,0 +1,53 @@
+/* General container styling */
+.skill-selection-container {
+  width: 90%;
+  max-width: 960px;
+  margin: 20px auto;
+  padding: 30px;
+  margin-top: calc(80px + 20px); /* 80px navbar height + 20px spacing */
+  background-color: #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh; /* Ensure the container takes full viewport height */
+  box-sizing: border-box;
+}
+
+/* Ensure the page content stays centered */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Accordion section */
+.accordion-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.accordion-content {
+  display: none;
+}
+
+.accordion-open .accordion-content {
+  display: block;
+}
+
+.accordion-open .accordion-title {
+  color: #10b981;
+}
+
+/* Ensure the page content doesn't collide */
+.max-w-4xl {
+  width: 100%;
+  padding: 20px;
+  margin-top: 10vh;
+  box-sizing: border-box;
+}

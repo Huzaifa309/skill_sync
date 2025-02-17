@@ -1,0 +1,34 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120px; /* Define the navbar height */
+  z-index: 1000; /* Ensure it stays above other elements */
+  background-color: #ffffff; /* Background color */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for better distinction */
+}
+  
+  .brand {
+    color: white;
+    font-size: 1.5rem;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .nav-button {
+    background-color: #0044cc;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background-color: #0033aa;
+  }
+  
