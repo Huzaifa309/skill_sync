@@ -12,12 +12,13 @@ body {
 
 /* SignUp Container */
 .signup-container {
-  max-width: 600px;
-  margin: 2rem auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--container-gradient-start) 0%, var(--container-gradient-end) 100%);
   padding: 2rem;
-  background: var(--card-background);
-  border-radius: 20px;
-  box-shadow: 0 4px 6px var(--shadow-color);
   position: relative;
   overflow: hidden;
 }
@@ -36,33 +37,7 @@ body {
 
 /* Header Section */
 .signup-header {
-  background: var(--card-background);
-  padding: 2.5rem;
-  border-radius: 20px;
-  box-shadow: 0 8px 32px var(--shadow-color);
-  width: 100%;
-  max-width: 600px;
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border-color);
-  transform: translateY(0);
-  transition: transform 0.3s ease;
-  margin-bottom: 2rem;
-}
-
-.signup-header:hover {
-  transform: translateY(-5px);
-}
-
-.signup-header h2 {
-  text-align: center;
-  color: var(--text-color);
-  margin-bottom: 1rem;
-  font-size: 2.2rem;
-  font-weight: 700;
-  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 4px var(--shadow-color);
+  display: none;
 }
 
 .progress-bar {
@@ -92,6 +67,24 @@ form {
   border: 1px solid var(--border-color);
 }
 
+/* Step Indicator in Form */
+form .step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+form .step-indicator svg {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
 form h3 {
   color: var(--text-color);
   margin-bottom: 1.5rem;
@@ -107,6 +100,8 @@ label {
   font-weight: 500;
 }
 
+/* Input field styling */
+.input-field,
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -115,16 +110,29 @@ input[type="date"],
 textarea,
 select {
   width: 100%;
-  padding: 1rem;
-  border: 2px solid rgba(44, 62, 80, 0.2);
-  border-radius: 10px;
-  font-size: 1rem;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.9);
-  color: #2c3e50 !important;
-  margin-bottom: 1.5rem;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  caret-color: #000000 !important;
 }
 
+/* Placeholder styling */
+.input-field::placeholder,
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="tel"]::placeholder,
+textarea::placeholder {
+  color: #666666 !important;
+  opacity: 0.8;
+}
+
+/* Focus state */
+.input-field:focus,
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
@@ -132,29 +140,74 @@ input[type="tel"]:focus,
 input[type="date"]:focus,
 textarea:focus,
 select:focus {
-  border-color: #2c3e50;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-  background: white;
-  color: #2c3e50 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
 }
 
+/* Validation message */
+.validation-message {
+  color: #ff0000 !important;
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
+  font-weight: 500;
+}
+
+/* Error state */
+.error-field {
+  border-color: #ff0000 !important;
+  background-color: #fff5f5 !important;
+  color: #000000 !important;
+}
+
+/* File input styling */
 input[type="file"] {
   width: 100%;
-  padding: 1rem;
-  border: 2px dashed rgba(44, 62, 80, 0.2);
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.9);
-  color: #2c3e50 !important;
-  margin-bottom: 1.5rem;
-  cursor: pointer;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #ffffff !important;
+  color: #000000 !important;
 }
 
-input[type="file"]:hover {
-  border-color: #2c3e50;
-  background: rgba(44, 62, 80, 0.05);
+/* Select dropdown styling */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background-color: #ffffff !important;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+}
+
+/* Disabled Next Button when form is invalid */
+button[type="submit"]:disabled {
+  background: var(--border-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Required Field Indicator */
+.required-field::after {
+  content: " *";
+  color: var(--error-color);
 }
 
 /* Button Styling */
@@ -272,11 +325,6 @@ button:disabled {
 }
 
 /* Error Styling */
-.error-field {
-  border-color: var(--error-color) !important;
-  background-color: #fde8e8 !important;
-}
-
 .error-field:focus {
   border-color: var(--error-color) !important;
   box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1) !important;
@@ -314,48 +362,117 @@ button:disabled {
   }
 }
 
-.signup-step {
-  animation: fadeIn 0.5s ease-out;
-  position: relative;
+/* Personal Information Dialog Inputs */
+.personal-info-dialog input[type="text"],
+.personal-info-dialog input[type="email"],
+.personal-info-dialog input[type="tel"],
+.personal-info-dialog input[type="date"],
+.personal-info-dialog select,
+.personal-info-dialog textarea {
+  color: #000000 !important;
+  background: #ffffff !important;
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000 !important;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* Override any dark theme styles */
+[data-theme="dark"] .personal-info-dialog input[type="text"],
+[data-theme="dark"] .personal-info-dialog input[type="email"],
+[data-theme="dark"] .personal-info-dialog input[type="tel"],
+[data-theme="dark"] .personal-info-dialog input[type="date"],
+[data-theme="dark"] .personal-info-dialog select,
+[data-theme="dark"] .personal-info-dialog textarea {
+  color: #000000 !important;
+  background: #ffffff !important;
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000 !important;
 }
 
-.signup-step.slide-out {
-  animation: slideOut 0.5s ease-out;
+/* Placeholder styling */
+.personal-info-dialog input::placeholder,
+.personal-info-dialog textarea::placeholder {
+  color: #666666 !important;
+  opacity: 1 !important;
 }
 
-@keyframes slideOut {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
+/* Validation text */
+.personal-info-dialog .validation-message {
+  color: #ff0000 !important;
 }
 
-.signup-step.slide-in {
-  animation: slideIn 0.5s ease-out;
+/* Phone Input Container */
+.phone-input-container {
+  width: 100%;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.phone-input-container .form-control {
+  width: 100% !important;
+  height: 48px !important;
+  padding: 12px !important;
+  padding-left: 48px !important;
+  font-size: 16px !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  transition: all 0.3s ease !important;
+}
+
+.phone-input-container .form-control:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25) !important;
+  outline: none !important;
+}
+
+.phone-input-container .flag-dropdown {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px 0 0 8px !important;
+  background-color: #ffffff !important;
+}
+
+.phone-input-container .selected-flag {
+  padding: 0 8px 0 12px !important;
+  border-radius: 8px 0 0 8px !important;
+}
+
+.phone-input-container .selected-flag:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* Country List Styling */
+.phone-input-container .country-list {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.phone-input-container .country {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.phone-input-container .country:hover {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+}
+
+.phone-input-container .country.highlight {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+}
+
+.phone-input-container .country-name {
+  color: #000000 !important;
+}
+
+.phone-input-container .country .dial-code {
+  color: #666666 !important;
+}
+
+/* Error state for phone input */
+.phone-input-container.error-field .form-control {
+  border-color: #ff0000 !important;
+  background-color: #fff5f5 !important;
 }

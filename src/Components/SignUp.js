@@ -1,48 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaUser, FaGraduationCap, FaCode, FaImage, FaCog, FaChevronDown } from 'react-icons/fa';
+import { countryCodes } from './countryCodes';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import './SignUp.css';
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
+  const [showCountryCodes, setShowCountryCodes] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
   const [formData, setFormData] = useState({
+    // Personal Information
     name: '',
     email: '',
     password: '',
     contactNumber: '',
     dateOfBirth: '',
     location: '',
+    
+    // Academic Information
     university: '',
     degree: '',
     yearOfStudy: '',
     educationalInterests: '',
+    
+    // Skills and Interests
     skills: '',
     skillsToAcquire: '',
     careerGoals: '',
     hobbies: '',
+    
+    // Profile Customization
     profilePicture: null,
     resume: null,
+    profilePictureURL: '',
+    resumeURL: '',
+    
+    // Additional Preferences
     learningStyle: '',
     availability: '',
     languages: '',
     subscribeNewsletter: false,
-    profilePictureURL: '',
-    resumeURL: ''
+    countryCode: 'US'
   });
 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleFileChange = (e) => {
@@ -50,31 +64,58 @@ const SignUp = () => {
     if (files.length > 0) {
       const file = files[0];
       const fileURL = URL.createObjectURL(file);
-      setFormData((prevData) => ({
-        ...prevData,
+      setFormData(prev => ({
+        ...prev,
         [name]: file,
         [`${name}URL`]: fileURL
       }));
     }
   };
 
+  const handleCountrySelect = (country) => {
+    setSelectedCountry(country);
+    setShowCountryCodes(false);
+  };
+
+  const autoDetectCountry = (location) => {
+    if (!location) return;
+    
+    const locationLower = location.toLowerCase();
+    const detectedCountry = countryCodes.find(country => 
+      country.country.toLowerCase().includes(locationLower) ||
+      locationLower.includes(country.country.toLowerCase())
+    );
+    
+    if (detectedCountry) {
+      setSelectedCountry(detectedCountry);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.location) {
+      autoDetectCountry(formData.location);
+    }
+  }, [formData.location]);
+
+  const handlePhoneChange = (value, country) => {
+    setFormData(prev => ({
+      ...prev,
+      contactNumber: value,
+      countryCode: country.countryCode
+    }));
+  };
+
   const validateStep = (currentStep) => {
     const newErrors = {};
-    let requiredFields = [];
+    const requiredFields = {
+      1: ['name', 'email', 'password', 'contactNumber', 'dateOfBirth', 'location'],
+      2: ['degree', 'yearOfStudy'],
+      3: ['skills', 'skillsToAcquire', 'careerGoals'],
+      4: [], // No required fields in step 4
+      5: ['learningStyle']
+    };
 
-    if (currentStep === 1) {
-      requiredFields = ['name', 'email', 'password', 'contactNumber', 'dateOfBirth', 'location'];
-    } else if (currentStep === 2) {
-      requiredFields = ['university', 'degree', 'yearOfStudy', 'educationalInterests'];
-    } else if (currentStep === 3) {
-      requiredFields = ['skills', 'skillsToAcquire', 'careerGoals', 'hobbies'];
-    } else if (currentStep === 4) {
-      requiredFields = ['profilePicture', 'resume'];
-    } else if (currentStep === 5) {
-      requiredFields = ['learningStyle'];
-    }
-
-    requiredFields.forEach(field => {
+    requiredFields[currentStep]?.forEach(field => {
       if (!formData[field] || formData[field].toString().trim() === '') {
         newErrors[field] = 'This field is required';
       }
@@ -86,12 +127,12 @@ const SignUp = () => {
 
   const nextStep = () => {
     if (validateStep(step)) {
-      setStep(step + 1);
+      setStep(prev => prev + 1);
     }
   };
 
   const prevStep = () => {
-    setStep(step - 1);
+    setStep(prev => prev - 1);
   };
 
   const handleSubmit = async (e) => {
@@ -103,24 +144,302 @@ const SignUp = () => {
           formData.email,
           formData.password
         );
-        const user = userCredential.user;
         
+        const user = userCredential.user;
         await setDoc(doc(db, 'users', user.uid), {
           ...formData,
-          profilePicture: formData.profilePicture ? formData.profilePicture.name : null,
-          resume: formData.resume ? formData.resume.name : null,
+          profilePicture: formData.profilePicture?.name || null,
+          resume: formData.resume?.name || null,
+          createdAt: new Date().toISOString()
         });
         
         navigate('/dashboard');
       } catch (error) {
         console.error('Error signing up:', error);
-        setErrors({ submit: 'Error signing up. Please try again.' });
+        setErrors({ submit: error.message });
       }
     }
   };
 
-  const getFieldClassName = (fieldName) => {
-    return errors[fieldName] ? 'error-field' : '';
+  const renderStepIcon = () => {
+    const icons = {
+      1: <FaUser />,
+      2: <FaGraduationCap />,
+      3: <FaCode />,
+      4: <FaImage />,
+      5: <FaCog />
+    };
+    return icons[step] || <FaUser />;
+  };
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="personal-info-dialog">
+            <h3>Personal Information</h3>
+            <div className="form-group">
+              <label className="required-field">Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                className={errors.name ? 'error-field' : ''}
+              />
+              {errors.name && <span className="validation-message">{errors.name}</span>}
+            </div>
+            
+            <div className="form-group">
+              <label className="required-field">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                className={errors.email ? 'error-field' : ''}
+              />
+              {errors.email && <span className="validation-message">{errors.email}</span>}
+            </div>
+            
+            <div className="form-group">
+              <label className="required-field">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Create a password"
+                className={errors.password ? 'error-field' : ''}
+              />
+              {errors.password && <span className="validation-message">{errors.password}</span>}
+            </div>
+            
+            <div className="form-group">
+              <label className="required-field">Contact Number</label>
+              <PhoneInput
+                country={'us'}
+                value={formData.contactNumber}
+                onChange={handlePhoneChange}
+                inputClass={errors.contactNumber ? 'error-field' : ''}
+                containerClass="phone-input-container"
+                inputProps={{
+                  name: 'contactNumber',
+                  required: true,
+                  autoFocus: false
+                }}
+              />
+              {errors.contactNumber && <span className="validation-message">{errors.contactNumber}</span>}
+            </div>
+            
+            <div className="form-group">
+              <label className="required-field">Date of Birth</label>
+              <input
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                className={errors.dateOfBirth ? 'error-field' : ''}
+              />
+              {errors.dateOfBirth && <span className="validation-message">{errors.dateOfBirth}</span>}
+            </div>
+            
+            <div className="form-group">
+              <label className="required-field">Location</label>
+              <textarea
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="Enter your location"
+                rows="2"
+                className={errors.location ? 'error-field' : ''}
+              />
+              {errors.location && <span className="validation-message">{errors.location}</span>}
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="academic-info-dialog">
+            <h3>Academic Information</h3>
+            <div className="form-group">
+              <label>University/School</label>
+              <textarea
+                name="university"
+                value={formData.university}
+                onChange={handleChange}
+                placeholder="Enter your university or school name"
+                rows="2"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="required-field">Degree/Program</label>
+              <textarea
+                name="degree"
+                value={formData.degree}
+                onChange={handleChange}
+                placeholder="Enter your degree or program"
+                rows="2"
+                className={errors.degree ? 'error-field' : ''}
+              />
+              {errors.degree && <span className="validation-message">{errors.degree}</span>}
+            </div>
+
+            <div className="form-group">
+              <label className="required-field">Year of Study</label>
+              <input
+                type="text"
+                name="yearOfStudy"
+                value={formData.yearOfStudy}
+                onChange={handleChange}
+                placeholder="Enter your year of study"
+                className={errors.yearOfStudy ? 'error-field' : ''}
+              />
+              {errors.yearOfStudy && <span className="validation-message">{errors.yearOfStudy}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>Educational Interests</label>
+              <textarea
+                name="educationalInterests"
+                value={formData.educationalInterests}
+                onChange={handleChange}
+                placeholder="Describe your educational interests"
+                rows="3"
+              />
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="skills-interests-dialog">
+            <h3>Skills and Interests</h3>
+            <div className="form-group">
+              <label className="required-field">Current Skills</label>
+              <textarea
+                name="skills"
+                value={formData.skills}
+                onChange={handleChange}
+                placeholder="List your current skills"
+                rows="3"
+                className={errors.skills ? 'error-field' : ''}
+              />
+              {errors.skills && <span className="validation-message">{errors.skills}</span>}
+            </div>
+
+            <div className="form-group">
+              <label className="required-field">Skills to Acquire</label>
+              <textarea
+                name="skillsToAcquire"
+                value={formData.skillsToAcquire}
+                onChange={handleChange}
+                placeholder="List skills you want to learn"
+                rows="3"
+                className={errors.skillsToAcquire ? 'error-field' : ''}
+              />
+              {errors.skillsToAcquire && <span className="validation-message">{errors.skillsToAcquire}</span>}
+            </div>
+
+            <div className="form-group">
+              <label className="required-field">Career Goals</label>
+              <textarea
+                name="careerGoals"
+                value={formData.careerGoals}
+                onChange={handleChange}
+                placeholder="Describe your career goals"
+                rows="4"
+                className={errors.careerGoals ? 'error-field' : ''}
+              />
+              {errors.careerGoals && <span className="validation-message">{errors.careerGoals}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>Interests/Hobbies</label>
+              <textarea
+                name="hobbies"
+                value={formData.hobbies}
+                onChange={handleChange}
+                placeholder="Describe your interests and hobbies"
+                rows="4"
+              />
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="profile-customization-dialog">
+            <h3>Profile Customization</h3>
+            <div className="form-group">
+              <label>Profile Picture</label>
+              <input
+                type="file"
+                name="profilePicture"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              {formData.profilePictureURL && (
+                <div className="file-preview">
+                  <img src={formData.profilePictureURL} alt="Profile Preview" className="image-preview" />
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>Resume Upload</label>
+              <input
+                type="file"
+                name="resume"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+              />
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="preferences-dialog">
+            <h3>Additional Preferences</h3>
+            <div className="form-group">
+              <label className="required-field">Preferred Learning Style</label>
+              <select
+                name="learningStyle"
+                value={formData.learningStyle}
+                onChange={handleChange}
+                className={errors.learningStyle ? 'error-field' : ''}
+              >
+                <option value="">Select Learning Style</option>
+                <option value="Visual">Visual</option>
+                <option value="Hands-On">Hands-On</option>
+                <option value="Reading">Reading</option>
+                <option value="Group Learning">Group Learning</option>
+              </select>
+              {errors.learningStyle && <span className="validation-message">{errors.learningStyle}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>
+                <input
+                  type="checkbox"
+                  name="subscribeNewsletter"
+                  checked={formData.subscribeNewsletter}
+                  onChange={handleChange}
+                />
+                Subscribe to Newsletter
+              </label>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
@@ -128,125 +447,32 @@ const SignUp = () => {
       <button className="back-button" onClick={() => navigate('/')}>
         <FaArrowLeft /> Back to Home
       </button>
-      <div className="signup-header">
-        <h2>SIGN UP</h2>
-      </div>
-      <form onSubmit={handleSubmit}>
-        {step === 1 && (
-          <>
-            <h3>Personal Information</h3>
-            <label>Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={getFieldClassName('name')}
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-            
-            <label>Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={getFieldClassName('email')}
-            />
-            {errors.email && <span className="error-message">{errors.email}</span>}
-            
-            <label>Password:</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={getFieldClassName('password')}
-            />
-            {errors.password && <span className="error-message">{errors.password}</span>}
-            
-            <label>Contact Number:</label>
-            <input
-              type="tel"
-              name="contactNumber"
-              value={formData.contactNumber}
-              onChange={handleChange}
-              className={getFieldClassName('contactNumber')}
-            />
-            {errors.contactNumber && <span className="error-message">{errors.contactNumber}</span>}
-            
-            <label>Date of Birth:</label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              className={getFieldClassName('dateOfBirth')}
-            />
-            {errors.dateOfBirth && <span className="error-message">{errors.dateOfBirth}</span>}
-            
-            <label>Location:</label>
-            <textarea
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              rows="2"
-              className={getFieldClassName('location')}
-            ></textarea>
-            {errors.location && <span className="error-message">{errors.location}</span>}
-          </>
-        )}
 
-        {step === 2 && (
-          <>
-            <h3>Academic Information</h3>
-            <textarea name="university" value={formData.university} onChange={handleChange} rows="2" placeholder="University/School"></textarea>
-            <textarea name="degree" value={formData.degree} onChange={handleChange} rows="2" placeholder="Degree/Program"></textarea>
-            <input type="text" name="yearOfStudy" value={formData.yearOfStudy} onChange={handleChange} placeholder="Year of Study" />
-            <textarea name="educationalInterests" value={formData.educationalInterests} onChange={handleChange} rows="3" placeholder="Educational Interests"></textarea>
-          </>
-        )}
+      <form onSubmit={handleSubmit} className="signup-form">
+        <div className="step-indicator">
+          {renderStepIcon()}
+          <span>Step {step} of 5</span>
+        </div>
 
-        {step === 3 && (
-          <>
-            <h3>Skills and Interests</h3>
-            <textarea name="skills" value={formData.skills} onChange={handleChange} rows="3" placeholder="Current Skills"></textarea>
-            <textarea name="skillsToAcquire" value={formData.skillsToAcquire} onChange={handleChange} rows="3" placeholder="Skills to Acquire"></textarea>
-            <textarea name="careerGoals" value={formData.careerGoals} onChange={handleChange} rows="4" placeholder="Career Goals"></textarea>
-            <textarea name="hobbies" value={formData.hobbies} onChange={handleChange} rows="4" placeholder="Interests/Hobbies"></textarea>
-          </>
-        )}
-
-        {step === 4 && (
-          <>
-            <h3>Profile Customization</h3>
-            <label>Profile Picture:</label>
-            <input type="file" name="profilePicture" accept="image/*" onChange={handleFileChange} />
-            <label>Resume Upload:</label>
-            <input type="file" name="resume" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
-          </>
-        )}
-
-        {step === 5 && (
-          <>
-            <h3>Additional Preferences</h3>
-            <label>Preferred Learning Style:</label>
-            <select name="learningStyle" value={formData.learningStyle} onChange={handleChange}>
-              <option value="">Select Learning Style</option>
-              <option value="Visual">Visual</option>
-              <option value="Hands-On">Hands-On</option>
-              <option value="Reading">Reading</option>
-              <option value="Group Learning">Group Learning</option>
-            </select>
-          </>
-        )}
+        {renderStepContent()}
 
         {errors.submit && <div className="error-message">{errors.submit}</div>}
         
         <div className="navigation-buttons">
-          {step > 1 && <button type="button" onClick={prevStep}>Previous</button>}
-          {step < 5 && <button type="button" onClick={nextStep}>Next</button>}
-          {step === 5 && <button type="submit">Sign Up</button>}
+          {step > 1 && (
+            <button type="button" onClick={prevStep} className="nav-button prev-button">
+              Previous
+            </button>
+          )}
+          {step < 5 ? (
+            <button type="button" onClick={nextStep} className="nav-button next-button">
+              Next
+            </button>
+          ) : (
+            <button type="submit" className="nav-button submit-button">
+              Sign Up
+            </button>
+          )}
         </div>
       </form>
     </div>
