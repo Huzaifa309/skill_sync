@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
+import { FaGithub, FaLinkedin, FaFacebook } from 'react-icons/fa';
 import './Footer.css';
 
 const Footer = () => {
@@ -23,9 +23,15 @@ const Footer = () => {
         <div className="footer-section">
           <h3>Connect With Us</h3>
           <div className="social-links">
-            <a href="#" className="social-link"><FaGithub /></a>
-            <a href="#" className="social-link"><FaLinkedin /></a>
-            <a href="#" className="social-link"><FaTwitter /></a>
+            <a href="https://www.facebook.com/profile.php?id=100007174127339" target="_blank" rel="noopener noreferrer" className="social-link">
+              <FaFacebook />
+            </a>
+            <a href="https://www.linkedin.com/in/huzaifa-ahmed-b22330156/" target="_blank" rel="noopener noreferrer" className="social-link">
+              <FaLinkedin />
+            </a>
+            <a href="https://github.com/Huzaifa309" target="_blank" rel="noopener noreferrer" className="social-link">
+              <FaGithub />
+            </a>
           </div>
         </div>
       </div>

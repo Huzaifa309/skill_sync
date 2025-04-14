@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { FaArrowLeft, FaUser, FaGraduationCap, FaCode, FaImage, FaCog, FaChevronDown } from 'react-icons/fa';
+import { FaArrowLeft, FaUser, FaGraduationCap, FaCode, FaImage, FaCog, FaChevronDown, FaFacebook, FaLinkedin, FaGithub } from 'react-icons/fa';
 import { countryCodes } from './countryCodes';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
