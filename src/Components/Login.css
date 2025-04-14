@@ -175,8 +175,9 @@ body {
   cursor: pointer;
   font-size: 0.9rem;
   padding: 0.3rem 0.6rem;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, background-color 0.3s ease;
   border-radius: 5px;
+  z-index: 2;
 }
 
 .toggle-password-button:hover:not(:disabled) {
