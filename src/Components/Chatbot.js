@@ -1,19 +1,47 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './Chatbot.css';
+import { auth, db } from '../firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const Chatbot = ({ onClose, userDetails }) => {
   const [userInput, setUserInput] = useState('');
   const [messages, setMessages] = useState(() => {
-    // Initialize with any existing messages from localStorage
-    const savedMessages = localStorage.getItem('chatbotMessages');
+    // Initialize with user-specific messages from localStorage
+    const userId = auth.currentUser?.uid;
+    const savedMessages = userId ? localStorage.getItem(`chatbotMessages_${userId}`) : null;
     return savedMessages ? JSON.parse(savedMessages) : [];
   });
   const [loading, setLoading] = useState(false);
+  const [userSkills, setUserSkills] = useState([]);
   const messagesEndRef = useRef(null);
 
   // Maximum number of messages to keep
-  const MAX_MESSAGES = 50; // Fixed number of messages to persist
+  const MAX_MESSAGES = 50;
+
+  // Fetch user's skills when component mounts
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      if (!auth.currentUser) return;
+      
+      try {
+        const userSkillsQuery = query(
+          collection(db, "userSkills"),
+          where("userId", "==", auth.currentUser.uid)
+        );
+        const querySnapshot = await getDocs(userSkillsQuery);
+        
+        if (!querySnapshot.empty) {
+          const skillsData = querySnapshot.docs[0].data();
+          setUserSkills(skillsData.skills || []);
+        }
+      } catch (error) {
+        console.error("Error fetching user skills:", error);
+      }
+    };
+
+    fetchUserSkills();
+  }, []);
 
   useEffect(() => {
     if (userDetails && messages.length === 0) {
@@ -23,13 +51,19 @@ const Chatbot = ({ onClose, userDetails }) => {
         timestamp: new Date().toISOString()
       };
       setMessages([initialMessage]);
-      localStorage.setItem('chatbotMessages', JSON.stringify([initialMessage]));
+      const userId = auth.currentUser?.uid;
+      if (userId) {
+        localStorage.setItem(`chatbotMessages_${userId}`, JSON.stringify([initialMessage]));
+      }
     }
   }, [userDetails, messages.length]);
 
   useEffect(() => {
-    // Save messages to localStorage whenever they change
-    localStorage.setItem('chatbotMessages', JSON.stringify(messages));
+    // Save messages to user-specific localStorage whenever they change
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      localStorage.setItem(`chatbotMessages_${userId}`, JSON.stringify(messages));
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -77,6 +111,13 @@ const Chatbot = ({ onClose, userDetails }) => {
     setLoading(true);
 
     try {
+      // Create a more detailed context including user skills
+      const userContext = {
+        ...userDetails,
+        skills: userSkills,
+        skillsToAcquire: userDetails?.skillsToAcquire || []
+      };
+
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.REACT_APP_GEMINI_API_KEY}`,
         {
@@ -84,7 +125,7 @@ const Chatbot = ({ onClose, userDetails }) => {
             { 
               "parts": [
                 { 
-                  "text": `User Info: ${JSON.stringify(userDetails)}. Message: ${userInput}` 
+                  "text": `User Context: ${JSON.stringify(userContext)}. Current Message: ${userInput}. Please provide career guidance considering the user's current skills and skills they want to acquire.`
                 }
               ] 
             }

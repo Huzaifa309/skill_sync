@@ -175,45 +175,45 @@ const SignUp = () => {
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return (
+  return (
           <div className="personal-info-dialog">
             <h3>Personal Information</h3>
             <div className="form-group">
               <label className="required-field">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
                 placeholder="Enter your full name"
                 className={errors.name ? 'error-field' : ''}
-              />
+            />
               {errors.name && <span className="validation-message">{errors.name}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
                 placeholder="Enter your email"
                 className={errors.email ? 'error-field' : ''}
-              />
+            />
               {errors.email && <span className="validation-message">{errors.email}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
                 placeholder="Create a password"
                 className={errors.password ? 'error-field' : ''}
-              />
+            />
               {errors.password && <span className="validation-message">{errors.password}</span>}
             </div>
             
@@ -221,7 +221,7 @@ const SignUp = () => {
               <label className="required-field">Contact Number</label>
               <PhoneInput
                 country={'us'}
-                value={formData.contactNumber}
+              value={formData.contactNumber}
                 onChange={handlePhoneChange}
                 inputClass={errors.contactNumber ? 'error-field' : ''}
                 containerClass="phone-input-container"
@@ -230,30 +230,30 @@ const SignUp = () => {
                   required: true,
                   autoFocus: false
                 }}
-              />
+            />
               {errors.contactNumber && <span className="validation-message">{errors.contactNumber}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Date of Birth</label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
                 className={errors.dateOfBirth ? 'error-field' : ''}
-              />
+            />
               {errors.dateOfBirth && <span className="validation-message">{errors.dateOfBirth}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Location</label>
-              <textarea
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
+            <textarea
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
                 placeholder="Enter your location"
-                rows="2"
+              rows="2"
                 className={errors.location ? 'error-field' : ''}
               />
               {errors.location && <span className="validation-message">{errors.location}</span>}
@@ -414,12 +414,12 @@ const SignUp = () => {
                 onChange={handleChange}
                 className={errors.learningStyle ? 'error-field' : ''}
               >
-                <option value="">Select Learning Style</option>
-                <option value="Visual">Visual</option>
-                <option value="Hands-On">Hands-On</option>
-                <option value="Reading">Reading</option>
-                <option value="Group Learning">Group Learning</option>
-              </select>
+              <option value="">Select Learning Style</option>
+              <option value="Visual">Visual</option>
+              <option value="Hands-On">Hands-On</option>
+              <option value="Reading">Reading</option>
+              <option value="Group Learning">Group Learning</option>
+            </select>
               {errors.learningStyle && <span className="validation-message">{errors.learningStyle}</span>}
             </div>
 

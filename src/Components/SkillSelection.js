@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { auth, db } from "../firebase"
 import { collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import SavedSkills from "./SavedSkills"
@@ -59,6 +59,103 @@ const SkillSelection = () => {
   const [savedSkills, setSavedSkills] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+
+  const searchInputRef = useRef(null);
+  const categoryButtonsRef = useRef([]);
+  const skillCheckboxesRef = useRef([]);
+
+  // Focus management
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
+
+  const handleKeyDown = (e, type, index) => {
+    switch (type) {
+      case 'search':
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          categoryButtonsRef.current[0]?.focus();
+        }
+        break;
+      
+      case 'category':
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const nextIndex = (index + 1) % categoryButtonsRef.current.length;
+          categoryButtonsRef.current[nextIndex]?.focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prevIndex = (index - 1 + categoryButtonsRef.current.length) % categoryButtonsRef.current.length;
+          categoryButtonsRef.current[prevIndex]?.focus();
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const firstSkillCheckbox = skillCheckboxesRef.current[0];
+          if (firstSkillCheckbox) {
+            firstSkillCheckbox.focus();
+          }
+        }
+        break;
+      
+      case 'skill':
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          const nextIndex = (index + 1) % skillCheckboxesRef.current.length;
+          skillCheckboxesRef.current[nextIndex]?.focus();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prevIndex = (index - 1 + skillCheckboxesRef.current.length) % skillCheckboxesRef.current.length;
+          skillCheckboxesRef.current[prevIndex]?.focus();
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const checkbox = e.target.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            handleSkillChange({ target: checkbox });
+          }
+        }
+        break;
+    }
+  };
+
+  // Memoize filtered skills to prevent unnecessary recalculations
+  const filteredSkills = useMemo(() => {
+    return Object.entries(skillCategories).reduce((acc, [category, skills]) => {
+      const filteredCategorySkills = skills.filter(skill => 
+        skill.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategory === 'all' || category === selectedCategory)
+      );
+      
+      if (filteredCategorySkills.length > 0) {
+        acc[category] = filteredCategorySkills;
+      }
+      return acc;
+    }, {});
+  }, [searchTerm, selectedCategory]);
+
+  // Memoize category buttons to prevent unnecessary re-renders
+  const categoryButtons = useMemo(() => (
+    <>
+      <button
+        className={`category-button ${selectedCategory === 'all' ? 'active' : ''}`}
+        onClick={() => setSelectedCategory('all')}
+      >
+        All Categories
+      </button>
+      {Object.keys(skillCategories).map((category) => (
+        <button
+          key={category}
+          className={`category-button ${selectedCategory === category ? 'active' : ''}`}
+          onClick={() => setSelectedCategory(category)}
+        >
+          {category}
+        </button>
+      ))}
+    </>
+  ), [selectedCategory]);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -142,80 +239,110 @@ const SkillSelection = () => {
     }
   }
 
+  const renderSkillCheckboxes = (skills) => (
+    <div className="skills-grid" role="group" aria-label="Skills selection">
+      {skills.map((skill, index) => (
+        <label 
+          key={skill} 
+          className="skill-checkbox"
+          tabIndex={0}
+          ref={el => skillCheckboxesRef.current[index] = el}
+          onKeyDown={(e) => handleKeyDown(e, 'skill', index)}
+        >
+          <input
+            type="checkbox"
+            value={skill}
+            checked={selectedSkills.includes(skill)}
+            onChange={handleSkillChange}
+            aria-label={`Select ${skill}`}
+          />
+          <span className="skill-label">{skill}</span>
+        </label>
+      ))}
+    </div>
+  );
+
+  const renderSkillsSection = () => {
+    if (loading) {
+      return <p>Loading...</p>;
+    }
+
+    if (savedSkills && !isEditing) {
+      return (
+        <SavedSkills
+          savedSkills={[savedSkills]}
+          setSelectedSkills={setSelectedSkills}
+          setIsEditing={setIsEditing}
+          fetchSavedSkills={fetchSavedSkills}
+        />
+      );
+    }
+
+    return (
+      <>
+        {Object.entries(filteredSkills).map(([category, skills]) => (
+          <div key={category} className="category" role="region" aria-label={category}>
+            <h3 className="category-title">{category}</h3>
+            {renderSkillCheckboxes(skills)}
+          </div>
+        ))}
+        <button 
+          onClick={saveSkillsToFirestore} 
+          className="button button-primary" 
+          disabled={loading || selectedSkills.length === 0}
+          aria-label="Save selected skills"
+        >
+          {loading ? "Saving..." : "Save Skills"}
+        </button>
+      </>
+    );
+  };
+
   return (
-    <div className="container">
+    <div className="container" role="main">
       <div className="content">
         <div className="card">
           <h2 className="section-title">
             {isEditing ? "Edit Your Skills" : "Choose the skills you want to learn"}
           </h2>
 
-          {loading ? (
-            <p>Loading...</p>
-          ) : savedSkills ? (
-            isEditing ? (
-              // Show the selection form with preloaded skills
-              <>
-                {Object.entries(skillCategories).map(([category, skills]) => (
-                  <div key={category} className="category">
-                    <h3 className="category-title">{category}</h3>
-                    <div className="skills-grid">
-                      {skills.map((skill) => (
-                        <label key={skill} className="skill-checkbox">
-                          <input
-                            type="checkbox"
-                            value={skill}
-                            checked={selectedSkills.includes(skill)}
-                            onChange={handleSkillChange}
-                          />
-                          <span className="skill-label">{skill}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                <button onClick={saveSkillsToFirestore} className="button button-primary" disabled={loading || selectedSkills.length === 0}>
-                  {loading ? "Saving..." : "Save Skills"}
-                </button>
-              </>
-            ) : (
-              <SavedSkills
-                savedSkills={savedSkills ? [savedSkills] : []}
-                setSelectedSkills={setSelectedSkills}
-                setIsEditing={setIsEditing}
-                fetchSavedSkills={fetchSavedSkills}
+          <div className="search-filter-section" role="search">
+            <div className="search-container">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search skills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+                aria-label="Search skills"
+                onKeyDown={(e) => handleKeyDown(e, 'search')}
               />
-            )
-          ) : (
-            // Show skill selection form if no saved skills exist
-            <>
-              {Object.entries(skillCategories).map(([category, skills]) => (
-                <div key={category} className="category">
-                  <h3 className="category-title">{category}</h3>
-                  <div className="skills-grid">
-                    {skills.map((skill) => (
-                      <label key={skill} className="skill-checkbox">
-                        <input
-                          type="checkbox"
-                          value={skill}
-                          checked={selectedSkills.includes(skill)}
-                          onChange={handleSkillChange}
-                        />
-                        <span className="skill-label">{skill}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+            </div>
+            
+            <div className="category-filter" role="tablist" aria-label="Skill categories">
+              {Object.keys(skillCategories).map((category, index) => (
+                <button
+                  key={category}
+                  ref={el => categoryButtonsRef.current[index] = el}
+                  className={`category-button ${selectedCategory === category ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(category)}
+                  onKeyDown={(e) => handleKeyDown(e, 'category', index)}
+                  role="tab"
+                  aria-selected={selectedCategory === category}
+                  aria-controls={`${category}-panel`}
+                >
+                  {category}
+                </button>
               ))}
-              <button onClick={saveSkillsToFirestore} className="button button-primary" disabled={loading || selectedSkills.length === 0}>
-                {loading ? "Saving..." : "Save Skills"}
-              </button>
-            </>
-          )}
+            </div>
+          </div>
+
+          {renderSkillsSection()}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SkillSelection
+export default SkillSelection;
