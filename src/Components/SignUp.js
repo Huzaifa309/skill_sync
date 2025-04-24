@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { FaArrowLeft, FaUser, FaGraduationCap, FaCode, FaImage, FaCog, FaChevronDown, FaFacebook, FaLinkedin, FaGithub } from 'react-icons/fa';
+import { FaArrowLeft, FaUser, FaGraduationCap, FaCode, FaImage, FaCog } from 'react-icons/fa';
 import { countryCodes } from './countryCodes';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -12,8 +12,6 @@ import './SignUp.css';
 const SignUp = () => {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
-  const [showCountryCodes, setShowCountryCodes] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
   const [formData, setFormData] = useState({
     // Personal Information
     name: '',
@@ -72,11 +70,6 @@ const SignUp = () => {
     }
   };
 
-  const handleCountrySelect = (country) => {
-    setSelectedCountry(country);
-    setShowCountryCodes(false);
-  };
-
   const autoDetectCountry = (location) => {
     if (!location) return;
     
@@ -87,7 +80,10 @@ const SignUp = () => {
     );
     
     if (detectedCountry) {
-      setSelectedCountry(detectedCountry);
+      setFormData(prev => ({
+        ...prev,
+        countryCode: detectedCountry.code
+      }));
     }
   };
 
@@ -175,45 +171,45 @@ const SignUp = () => {
   const renderStepContent = () => {
     switch (step) {
       case 1:
-  return (
+        return (
           <div className="personal-info-dialog">
             <h3>Personal Information</h3>
             <div className="form-group">
               <label className="required-field">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Enter your full name"
                 className={errors.name ? 'error-field' : ''}
-            />
+              />
               {errors.name && <span className="validation-message">{errors.name}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Enter your email"
                 className={errors.email ? 'error-field' : ''}
-            />
+              />
               {errors.email && <span className="validation-message">{errors.email}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Create a password"
                 className={errors.password ? 'error-field' : ''}
-            />
+              />
               {errors.password && <span className="validation-message">{errors.password}</span>}
             </div>
             
@@ -221,7 +217,7 @@ const SignUp = () => {
               <label className="required-field">Contact Number</label>
               <PhoneInput
                 country={'us'}
-              value={formData.contactNumber}
+                value={formData.contactNumber}
                 onChange={handlePhoneChange}
                 inputClass={errors.contactNumber ? 'error-field' : ''}
                 containerClass="phone-input-container"
@@ -230,30 +226,30 @@ const SignUp = () => {
                   required: true,
                   autoFocus: false
                 }}
-            />
+              />
               {errors.contactNumber && <span className="validation-message">{errors.contactNumber}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Date of Birth</label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
+              <input
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
                 className={errors.dateOfBirth ? 'error-field' : ''}
-            />
+              />
               {errors.dateOfBirth && <span className="validation-message">{errors.dateOfBirth}</span>}
             </div>
             
             <div className="form-group">
               <label className="required-field">Location</label>
-            <textarea
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
+              <textarea
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
                 placeholder="Enter your location"
-              rows="2"
+                rows="2"
                 className={errors.location ? 'error-field' : ''}
               />
               {errors.location && <span className="validation-message">{errors.location}</span>}

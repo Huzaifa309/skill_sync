@@ -7,7 +7,8 @@ import SavedSkills from "./SavedSkills"
 import "./SkillSelection.css"
 
 const SkillSelection = () => {
-  const skillCategories = {
+  // Memoize the skillCategories object to prevent recreation on every render
+  const skillCategories = useMemo(() => ({
     "Programming Languages": [
         "JavaScript", "Python", "Java", "C", "C++", "Ruby", "Go", "Swift", "Rust", "PHP", 
         "TypeScript", "Kotlin", "Dart", "Scala", "Perl", "Haskell"
@@ -53,7 +54,7 @@ const SkillSelection = () => {
     "Networking": [
         "Cisco", "CCNA", "Network Security", "VPN", "Firewalls", "TCP/IP", "BGP", "Routing & Switching"
     ]
-  };
+  }), []); // Empty dependency array since this is a static object
 
   const [selectedSkills, setSelectedSkills] = useState([])
   const [savedSkills, setSavedSkills] = useState(null)
@@ -73,7 +74,8 @@ const SkillSelection = () => {
     }
   }, []);
 
-  const handleKeyDown = (e, type, index) => {
+  // Memoize the handleKeyDown function to prevent recreation on every render
+  const handleKeyDown = useMemo(() => (e, type, index) => {
     switch (type) {
       case 'search':
         if (e.key === 'ArrowDown') {
@@ -118,8 +120,11 @@ const SkillSelection = () => {
           }
         }
         break;
+      default:
+        // Handle any other key presses if needed
+        break;
     }
-  };
+  }, []); // Empty dependency array since this function doesn't depend on any props or state
 
   // Memoize filtered skills to prevent unnecessary recalculations
   const filteredSkills = useMemo(() => {
@@ -134,28 +139,32 @@ const SkillSelection = () => {
       }
       return acc;
     }, {});
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, skillCategories]);
 
-  // Memoize category buttons to prevent unnecessary re-renders
+  // Update the categoryButtons useMemo to include handleKeyDown in its dependencies
   const categoryButtons = useMemo(() => (
-    <>
+    <div className="category-buttons" role="group" aria-label="Skill categories">
       <button
         className={`category-button ${selectedCategory === 'all' ? 'active' : ''}`}
         onClick={() => setSelectedCategory('all')}
+        ref={el => categoryButtonsRef.current[0] = el}
+        onKeyDown={(e) => handleKeyDown(e, 'category', 0)}
       >
         All Categories
       </button>
-      {Object.keys(skillCategories).map((category) => (
+      {Object.keys(skillCategories).map((category, index) => (
         <button
           key={category}
           className={`category-button ${selectedCategory === category ? 'active' : ''}`}
           onClick={() => setSelectedCategory(category)}
+          ref={el => categoryButtonsRef.current[index + 1] = el}
+          onKeyDown={(e) => handleKeyDown(e, 'category', index + 1)}
         >
           {category}
         </button>
       ))}
-    </>
-  ), [selectedCategory]);
+    </div>
+  ), [selectedCategory, skillCategories, handleKeyDown]);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -316,25 +325,12 @@ const SkillSelection = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
                 aria-label="Search skills"
-                onKeyDown={(e) => handleKeyDown(e, 'search')}
+                onKeyDown={(e) => handleKeyDown(e, 'search', 0)}
               />
             </div>
             
             <div className="category-filter" role="tablist" aria-label="Skill categories">
-              {Object.keys(skillCategories).map((category, index) => (
-                <button
-                  key={category}
-                  ref={el => categoryButtonsRef.current[index] = el}
-                  className={`category-button ${selectedCategory === category ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(category)}
-                  onKeyDown={(e) => handleKeyDown(e, 'category', index)}
-                  role="tab"
-                  aria-selected={selectedCategory === category}
-                  aria-controls={`${category}-panel`}
-                >
-                  {category}
-                </button>
-              ))}
+              {categoryButtons}
             </div>
           </div>
 
