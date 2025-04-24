@@ -13,7 +13,7 @@ const SavedSkills = ({ savedSkills, setSelectedSkills, setIsEditing, fetchSavedS
     try {
       if (selectedSkills.length === currentSkills.length) {
         // If all skills are selected, delete the entire document
-        await deleteDoc(doc(db, "userSkills", id));
+      await deleteDoc(doc(db, "userSkills", id));
       } else {
         // Otherwise, update the document to remove only selected skills
         const updatedSkills = currentSkills.filter(skill => !selectedSkills.includes(skill));

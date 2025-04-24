@@ -27,17 +27,11 @@ html, body {
   color: var(--text-color);
 }
 
-/* Add viewport meta settings */
-@viewport {
-  width: device-width;
-  zoom: 1.0;
-}
-
-/* Base styles */
 .home-page {
-  width: 100%;
   min-height: 100vh;
+  width: 100%;
   overflow-x: hidden;
+  background: linear-gradient(135deg, var(--container-gradient-start) 0%, var(--container-gradient-end) 100%);
 }
 
 /* Navbar */
@@ -101,28 +95,31 @@ html, body {
 }
 
 /* Hero Section */
-.hero {
-  padding: 4rem 2rem;
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
   text-align: center;
-  background: linear-gradient(135deg, #f6f7fb 0%, #ffffff 100%);
 }
 
-.hero h1 {
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-content h1 {
   font-size: 3.5rem;
   margin-bottom: 1.5rem;
-  color: #1a1a1a;
-}
-
-.hero p {
-  font-size: 1.25rem;
-  color: #4a4a4a;
-  max-width: 800px;
-  margin: 0 auto 2rem;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
   font-size: 1.2rem;
-  margin-bottom: 2rem;  
+  margin-bottom: 2rem;
   color: var(--text-color);
   opacity: 0.9;
 }
@@ -185,14 +182,12 @@ html, body {
 }
 
 .feature-card {
-  background: white;
-  border-radius: 12px;
+  background: #f3f4f6 !important;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 4px 6px var(--shadow-color);
   transition: transform 0.3s ease;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  text-align: center;
 }
 
 .feature-card * {
@@ -201,6 +196,7 @@ html, body {
 
 .feature-card:hover {
   transform: translateY(-5px);
+  background: #e5e7eb !important;
 }
 
 .feature-icon {
@@ -323,19 +319,10 @@ html, body {
   opacity: 0.8;
 }
 
-/* Mobile Responsive Styles */
+/* Responsive Design */
 @media (max-width: 768px) {
-  .hero {
-    padding: 3rem 1.5rem;
-  }
-
-  .hero h1 {
+  .hero-content h1 {
     font-size: 2.5rem;
-  }
-
-  .hero p {
-    font-size: 1.1rem;
-    padding: 0 1rem;
   }
 
   .hero-subtitle {
@@ -354,11 +341,6 @@ html, body {
   .nav-buttons {
     flex-direction: column;
   }
-
-  .feature-card {
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
 }
 
 @media (max-width: 480px) {
@@ -371,33 +353,9 @@ html, body {
     font-size: 0.9rem;
   }
 
-  .hero {
-    padding: 2rem 1rem;
-  }
-
-  .hero h1 {
+  .hero-content h1 {
     font-size: 2rem;
   }
-
-  .hero p {
-    font-size: 1rem;
-  }
-
-  .feature-card {
-    padding: 1rem;
-  }
-}
-
-/* Ensure proper scaling on mobile devices */
-html {
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-}
-
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
   
