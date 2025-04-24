@@ -30,12 +30,12 @@ const Home = () => {
           <div className="hero-buttons">
             <button className="cta-button primary large" onClick={() => navigate('/signup')}>
               <FaRocket /> Get Started
-            </button>
+          </button>
             <button className="cta-button secondary large" onClick={() => navigate('/login')}>
               <FaUser /> Login
-            </button>
-          </div>
+          </button>
         </div>
+      </div>
       </section>
 
       <section className="features-section">
@@ -48,14 +48,14 @@ const Home = () => {
             <h3>Personalized Career Path</h3>
             <p>Get tailored career recommendations based on your skills, interests, and goals.</p>
           </div>
-          <div className="feature-card">
+        <div className="feature-card">
             <div className="feature-icon">
               <FaGraduationCap />
             </div>
             <h3>Skill Development</h3>
             <p>Access curated learning resources and track your progress towards career goals.</p>
-          </div>
-          <div className="feature-card">
+        </div>
+        <div className="feature-card">
             <div className="feature-icon">
               <FaComments />
             </div>
@@ -102,7 +102,7 @@ const Home = () => {
           <button className="cta-button primary large" onClick={() => navigate('/signup')}>
             <FaRocket /> Start Now
           </button>
-        </div>
+      </div>
       </section>
 
       <Footer />

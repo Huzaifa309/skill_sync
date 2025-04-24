@@ -106,6 +106,17 @@ const Profile = () => {
     }
   };
 
+  const formatValue = (value) => {
+    if (!value) return 'Not provided';
+    if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        return value.join(', ');
+      }
+      return JSON.stringify(value);
+    }
+    return value;
+  };
+
   return (
     <div className="profile-container">
       <h2 className="profile-header">Current Profile</h2>
@@ -123,21 +134,21 @@ const Profile = () => {
         </form>
       ) : (
         <div className="profile-data">
-          <p><strong>Name:</strong> <span>{formData.name || 'Not provided'}</span></p>
-          <p><strong>Email:</strong> <span>{formData.email || 'Not provided'}</span></p>
-          <p><strong>Contact Number:</strong> <span>{formData.contactNumber || 'Not provided'}</span></p>
-          <p><strong>Location:</strong> <span>{formData.location || 'Not provided'}</span></p>
-          <p><strong>University:</strong> <span>{formData.university || 'Not provided'}</span></p>
-          <p><strong>Degree:</strong> <span>{formData.degree || 'Not provided'}</span></p>
-          <p><strong>Year of Study:</strong> <span>{formData.yearOfStudy || 'Not provided'}</span></p>
-          <p><strong>Educational Interests:</strong> <span>{formData.educationalInterests || 'Not provided'}</span></p>
-          <p><strong>Skills:</strong> <span>{formData.skills || 'Not provided'}</span></p>
-          <p><strong>Skills to Acquire:</strong> <span>{formData.skillsToAcquire || 'Not provided'}</span></p>
-          <p><strong>Career Goals:</strong> <span>{formData.careerGoals || 'Not provided'}</span></p>
-          <p><strong>Hobbies:</strong> <span>{formData.hobbies || 'Not provided'}</span></p>
-          <p><strong>Learning Style:</strong> <span>{formData.learningStyle || 'Not provided'}</span></p>
-          <p><strong>Availability:</strong> <span>{formData.availability || 'Not provided'}</span></p>
-          <p><strong>Languages Known:</strong> <span>{formData.languages || 'Not provided'}</span></p>
+          <p><strong>Name:</strong> <span>{formatValue(formData.name)}</span></p>
+          <p><strong>Email:</strong> <span>{formatValue(formData.email)}</span></p>
+          <p><strong>Contact Number:</strong> <span>{formatValue(formData.contactNumber)}</span></p>
+          <p><strong>Location:</strong> <span>{formatValue(formData.location)}</span></p>
+          <p><strong>University:</strong> <span>{formatValue(formData.university)}</span></p>
+          <p><strong>Degree:</strong> <span>{formatValue(formData.degree)}</span></p>
+          <p><strong>Year of Study:</strong> <span>{formatValue(formData.yearOfStudy)}</span></p>
+          <p><strong>Educational Interests:</strong> <span>{formatValue(formData.educationalInterests)}</span></p>
+          <p><strong>Skills:</strong> <span>{formatValue(formData.skills)}</span></p>
+          <p><strong>Skills to Acquire:</strong> <span>{formatValue(formData.skillsToAcquire)}</span></p>
+          <p><strong>Career Goals:</strong> <span>{formatValue(formData.careerGoals)}</span></p>
+          <p><strong>Hobbies:</strong> <span>{formatValue(formData.hobbies)}</span></p>
+          <p><strong>Learning Style:</strong> <span>{formatValue(formData.learningStyle)}</span></p>
+          <p><strong>Availability:</strong> <span>{formatValue(formData.availability)}</span></p>
+          <p><strong>Languages Known:</strong> <span>{formatValue(formData.languages)}</span></p>
           
           <div className="edit-button-container">
             <button onClick={() => setIsEditing(true)}>Edit Profile</button>

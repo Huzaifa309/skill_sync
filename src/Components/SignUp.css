@@ -283,8 +283,8 @@ button:disabled {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px var(--shadow-color);
   background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
-}
-
+  }
+  
 /* Message Styling */
 .success-message {
   color: var(--success-color);
@@ -293,7 +293,7 @@ button:disabled {
   border-radius: 10px;
   margin-bottom: 1.5rem;
   text-align: center;
-  font-size: 0.9rem;
+    font-size: 0.9rem;
   border: 1px solid #c3e6cb;
   box-shadow: 0 2px 4px var(--shadow-color);
 }

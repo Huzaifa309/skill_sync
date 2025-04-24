@@ -26,8 +26,8 @@ const ForgotPassword = () => {
         setErrorMessage('No account found with this email address.');
       } else {
         setErrorMessage('Failed to send reset email. Please try again.');
-      }
     }
+  }
   };
 
   return (

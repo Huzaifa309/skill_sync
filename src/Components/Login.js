@@ -197,24 +197,24 @@ const Login = () => {
             />
           </div>
           <div className="input-field">
-            <FaLock className="icon" />
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+  <FaLock className="icon" />
+  <input
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
               disabled={isLoading}
-            />
-            <button
-              type="button"
-              className="toggle-password-button"
+  />
+  <button
+    type="button"
+    className="toggle-password-button"
               onClick={() => setShowPassword(!showPassword)}
               disabled={isLoading}
-            >
+  >
               {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
+  </button>
+</div>
           <button
             type="submit"
             className={`login-button ${isLoading ? "loading" : ""}`}

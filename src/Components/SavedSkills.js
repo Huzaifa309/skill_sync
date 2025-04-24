@@ -1,31 +1,50 @@
 import { useState } from "react";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import "./SavedSkills.css"; // Import CSS for better styling
 
 const SavedSkills = ({ savedSkills, setSelectedSkills, setIsEditing, fetchSavedSkills }) => {
   const [courseData, setCourseData] = useState({});
   const [loadingCourses, setLoadingCourses] = useState(null);
+  const [selectedSkills, setSelectedSkillsState] = useState([]);
 
-  // Delete saved skills from Firestore
-  const deleteSkillsFromFirestore = async (id) => {
+  // Delete selected skills from Firestore
+  const deleteSelectedSkills = async (id, currentSkills) => {
     try {
-      await deleteDoc(doc(db, "userSkills", id));
+      if (selectedSkills.length === currentSkills.length) {
+        // If all skills are selected, delete the entire document
+        await deleteDoc(doc(db, "userSkills", id));
+      } else {
+        // Otherwise, update the document to remove only selected skills
+        const updatedSkills = currentSkills.filter(skill => !selectedSkills.includes(skill));
+        await updateDoc(doc(db, "userSkills", id), {
+          skills: updatedSkills
+        });
+      }
       fetchSavedSkills();
+      setSelectedSkillsState([]); // Clear selection after deletion
     } catch (err) {
-      console.error("❌ Error deleting document:", err);
+      console.error("❌ Error updating document:", err);
     }
   };
 
-  // Fetch courses for each skill
-  const fetchCourseData = async (skills, id) => {
-    if (loadingCourses) return; // Prevent multiple requests
+  // Handle skill selection
+  const handleSkillClick = (skill) => {
+    if (selectedSkills.includes(skill)) {
+      setSelectedSkillsState(selectedSkills.filter(s => s !== skill));
+    } else {
+      setSelectedSkillsState([...selectedSkills, skill]);
+    }
+  };
+
+  // Fetch courses for selected skills
+  const fetchCourseData = async (id) => {
+    if (loadingCourses || selectedSkills.length === 0) return;
 
     setLoadingCourses(id);
+    console.log("📌 Fetching courses for selected skills:", selectedSkills);
 
-    console.log("📌 Fetching courses for skills:", skills);
-
-    const courseResults = skills.map((skill) => ({
+    const courseResults = selectedSkills.map((skill) => ({
       skill,
       platforms: [
         {
@@ -48,7 +67,7 @@ const SavedSkills = ({ savedSkills, setSelectedSkills, setIsEditing, fetchSavedS
     }));
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log("✅ Courses fetched:", courseResults);
       setCourseData((prevData) => ({ ...prevData, [id]: courseResults }));
     } catch (error) {
@@ -67,9 +86,25 @@ const SavedSkills = ({ savedSkills, setSelectedSkills, setIsEditing, fetchSavedS
       ) : (
         savedSkills.map((skillSet) => (
           <div key={skillSet.id} className="saved-skill-item">
-            <p className="saved-skill-text">
-              <strong>Skills:</strong> {skillSet.skills.join(", ")}
-            </p>
+            <div className="skills-list">
+              {skillSet.skills.map((skill) => (
+                <div 
+                  key={skill} 
+                  className={`skill-checkbox ${selectedSkills.includes(skill) ? 'selected' : ''}`}
+                  onClick={() => handleSkillClick(skill)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedSkills.includes(skill)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleSkillClick(skill);
+                    }}
+                  />
+                  <span className="skill-label">{skill}</span>
+                </div>
+              ))}
+            </div>
             <div className="button-group">
               <button
                 onClick={() => {
@@ -80,13 +115,17 @@ const SavedSkills = ({ savedSkills, setSelectedSkills, setIsEditing, fetchSavedS
               >
                 ✏️ Edit
               </button>
-              <button onClick={() => deleteSkillsFromFirestore(skillSet.id)} className="button button-delete">
-                ❌ Delete
+              <button 
+                onClick={() => deleteSelectedSkills(skillSet.id, skillSet.skills)} 
+                className="button button-delete"
+                disabled={selectedSkills.length === 0}
+              >
+                ❌ Delete Selected
               </button>
               <button
-                onClick={() => fetchCourseData(skillSet.skills, skillSet.id)}
+                onClick={() => fetchCourseData(skillSet.id)}
                 className="button button-courses"
-                disabled={loadingCourses === skillSet.id}
+                disabled={loadingCourses === skillSet.id || selectedSkills.length === 0}
               >
                 {loadingCourses === skillSet.id ? "⏳ Loading..." : "📚 Get Courses"}
               </button>
