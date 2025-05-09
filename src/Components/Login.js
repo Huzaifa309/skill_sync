@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword, 
   setPersistence, 
   browserLocalPersistence,
+  browserSessionPersistence,
   onAuthStateChanged,
   sendPasswordResetEmail
 } from "firebase/auth";
@@ -26,27 +27,46 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [authState, setAuthState] = useState("checking"); // 'checking', 'authenticated', 'unauthenticated'
+  const [staySignedIn, setStaySignedIn] = useState(false);
   const navigate = useNavigate();
 
-  // Set up auth state listener and persistence
+  // Check persistence state on mount
+  useEffect(() => {
+    const checkPersistence = async () => {
+      try {
+        // Force session persistence by default
+        await setPersistence(auth, browserSessionPersistence);
+        
+        // If there's a user but staySignedIn is false, sign them out
+        if (auth.currentUser && !staySignedIn) {
+          await auth.signOut();
+        }
+      } catch (error) {
+        console.error("Error setting persistence:", error);
+      }
+    };
+    
+    checkPersistence();
+  }, []);
+
+  // Set up auth state listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // If user exists but staySignedIn is false, sign them out
+        if (!staySignedIn) {
+          await auth.signOut();
+          setAuthState("unauthenticated");
+          return;
+        }
+
         setAuthState("authenticated");
         
-        // Update or create user document in Firestore
         try {
           const userDoc = doc(db, 'users', user.uid);
           const docSnap = await getDoc(userDoc);
           
-          console.log('Firestore document state:', {
-            exists: docSnap.exists(),
-            data: docSnap.data(),
-            metadata: docSnap.metadata
-          });
-          
           if (!docSnap.exists()) {
-            console.log('Creating new user document');
             await setDoc(userDoc, {
               email: user.email,
               createdAt: new Date(),
@@ -54,14 +74,11 @@ const Login = () => {
               updatedAt: new Date()
             });
           } else {
-            console.log('Updating existing user document');
             await setDoc(userDoc, {
               lastLogin: new Date(),
               updatedAt: new Date()
             }, { merge: true });
           }
-          
-          console.log("User document updated in Firestore");
         } catch (error) {
           console.error('Firestore update error:', error);
         }
@@ -72,15 +89,8 @@ const Login = () => {
       }
     });
 
-    // Set persistence
-    setPersistence(auth, browserLocalPersistence)
-      .catch((error) => {
-        console.error("Persistence error:", error);
-        setError("Could not set up session persistence. Please try again.");
-      });
-
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, staySignedIn]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -90,11 +100,13 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log("Attempting login with:", {
-        email: email,
-        passwordLength: password.length,
-        timestamp: new Date().toISOString()
-      });
+      // Always sign out first to ensure clean state
+      if (auth.currentUser) {
+        await auth.signOut();
+      }
+
+      // Set persistence based on checkbox
+      await setPersistence(auth, staySignedIn ? browserLocalPersistence : browserSessionPersistence);
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -118,7 +130,6 @@ const Login = () => {
       
       await setDoc(userDoc, userData, { merge: true });
       
-      console.log('Login successful and database updated:', userData);
       navigate('/dashboard');
     } catch (error) {
       console.error("Detailed login error:", {
@@ -197,24 +208,34 @@ const Login = () => {
             />
           </div>
           <div className="input-field">
-  <FaLock className="icon" />
-  <input
-    type={showPassword ? "text" : "password"}
-    placeholder="Password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    required
+            <FaLock className="icon" />
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               disabled={isLoading}
-  />
-  <button
-    type="button"
-    className="toggle-password-button"
+            />
+            <button
+              type="button"
+              className="toggle-password-button"
               onClick={() => setShowPassword(!showPassword)}
               disabled={isLoading}
-  >
+            >
               {showPassword ? "Hide" : "Show"}
-  </button>
-</div>
+            </button>
+          </div>
+          <div className="stay-signed-in">
+            <input
+              type="checkbox"
+              id="staySignedIn"
+              checked={staySignedIn}
+              onChange={(e) => setStaySignedIn(e.target.checked)}
+              disabled={isLoading}
+            />
+            <label htmlFor="staySignedIn">Stay signed in</label>
+          </div>
           <button
             type="submit"
             className={`login-button ${isLoading ? "loading" : ""}`}
