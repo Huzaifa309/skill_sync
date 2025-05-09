@@ -109,6 +109,7 @@ body {
   font-weight: 700;
   background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 2px 4px var(--shadow-color);
 }
@@ -167,22 +168,28 @@ body {
 .toggle-password-button {
   position: absolute;
   right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  margin: auto;
   background: none;
   border: none;
   color: #3498db;
   cursor: pointer;
   font-size: 0.9rem;
   padding: 0.3rem 0.6rem;
-  transition: color 0.3s ease, background-color 0.3s ease;
+  transition: color 0.3s ease;
   border-radius: 5px;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 24px;
 }
 
 .toggle-password-button:hover:not(:disabled) {
-  background: rgba(52, 152, 219, 0.1);
   color: #2980b9;
+  background: rgba(52, 152, 219, 0.1);
 }
 
 .toggle-password-button:disabled {
