@@ -277,6 +277,37 @@ body {
   background: rgba(52, 152, 219, 0.1);
 }
 
+.stay-signed-in {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  color: #666;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.stay-signed-in input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3498db;
+  margin: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.stay-signed-in label {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
   .login-page {
