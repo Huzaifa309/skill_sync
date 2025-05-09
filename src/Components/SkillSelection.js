@@ -1,8 +1,6 @@
-"use client"
-
 import { useState, useEffect, useMemo, useRef } from "react"
 import { auth, db } from "../firebase"
-import { collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc } from "firebase/firestore"
+import { collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc, getDoc } from "firebase/firestore"
 import SavedSkills from "./SavedSkills"
 import "./SkillSelection.css"
 
@@ -10,51 +8,116 @@ const SkillSelection = () => {
   // Memoize the skillCategories object to prevent recreation on every render
   const skillCategories = useMemo(() => ({
     "Programming Languages": [
-        "JavaScript", "Python", "Java", "C", "C++", "Ruby", "Go", "Swift", "Rust", "PHP", 
-        "TypeScript", "Kotlin", "Dart", "Scala", "Perl", "Haskell"
+      "Ada", "Agda", "Assembly", "ATS", "AWK", "Ballerina", "Bash", "Bosque", "C", "C#", "C++", 
+      "Chisel", "Clojure", "COBOL", "Crystal", "Dart", "Datalog", "Elixir", "Erlang", "F#", 
+      "Forth", "Fortran", "F#", "Gleam", "Go", "Hack", "Haskell", "HTML", "Idris", "Io", 
+      "Java", "JavaScript", "Janet", "Julia", "Kotlin", "LaTeX", "LESS", "Lisp", "Lua", 
+      "Markdown", "MATLAB", "MoonScript", "Nim", "NoSQL", "Objective-C", "OCaml", "Perl", 
+      "PHP", "Pony", "PowerShell", "Prolog", "Python", "R", "Racket", "ReasonML", "Red", 
+      "ReScript", "Ruby", "Rust", "SASS", "Scala", "Scheme", "SED", "Shell Scripting", 
+      "SML", "SQL", "SPARQL", "Swift", "SystemVerilog", "Tcl", "TypeScript", "Vala", 
+      "Verilog", "VHDL", "XML", "YAML", "Zig", "Zsh"
     ],
     "Web Development": [
-        "React", "Vue.js", "Angular", "HTML", "CSS", "Node.js", "Bootstrap", "Tailwind CSS", 
-        "Next.js", "Svelte", "Django", "Flask", "Express.js", "ASP.NET"
+      "AJAX", "Alpine.js", "Angular", "ASP.NET", "Astro", "Bootstrap", "Canvas API", 
+      "Chakra UI", "CSS", "D3.js", "Django", "Dojo", "EJS", "Eleventy", "Ember.js", 
+      "Express.js", "Flask", "Gatsby", "Gridsome", "Handlebars", "HTML", "HTMX", 
+      "Hugo", "jQuery", "Jekyll", "Liquid", "Lit", "Marko", "Material UI", "Mithril.js", 
+      "Next.js", "Node.js", "Nuxt.js", "Parcel", "Pug", "Qwik", "React", "Remix", 
+      "Serverless", "SolidJS", "Stencil.js", "Svelte", "Tailwind CSS", "Tauri", 
+      "Three.js", "Vite", "Vue.js", "Web Components", "WebGL", "WebGPU", "Windi CSS", 
+      "Wix Velo"
     ],
     "Data Science": [
-        "Python", "R", "TensorFlow", "Keras", "PyTorch", "Pandas", "Machine Learning", 
-        "Scikit-learn", "Matplotlib", "Seaborn", "NumPy", "Deep Learning", "Data Visualization"
+      "AllenNLP", "Altair", "AutoML", "BERT", "BigML", "Bokeh", "Cartopy", "CatBoost", 
+      "ClearML", "CNTK", "cuDF", "D-Wave", "Dash", "DataFusion", "Dataiku", "DataRobot", 
+      "Data Visualization", "Datashader", "Datatable", "Deep Learning", "DVC", "Edge AI", 
+      "Evidently", "FAISS", "Feast", "Geopandas", "GPT", "Great Expectations", "H2O.ai", 
+      "Haystack", "JAX", "Keras", "Koalas", "LangChain", "LightGBM", "Machine Learning", 
+      "Matplotlib", "MediaPipe", "MLflow", "MXNet", "NetworkX", "Neptune.ai", "NLTK", 
+      "NumPy", "ONNX", "OpenCV", "Pandas", "Panel", "Pinecone", "Plotly", "Polars", 
+      "PyTorch", "Python", "Qiskit", "Quantum Computing", "R", "RAG", "Raphtory", 
+      "Rapids.ai", "Reinforcement Learning", "RoBERTa", "Scikit-learn", "Seaborn", 
+      "Sentence-BERT", "spaCy", "Stanza", "T5", "TensorFlow", "Theano", "TinyML", 
+      "TPOT", "Transformers", "Vaex", "Weights & Biases", "WhyLogs", "XGBoost"
     ],
     "DevOps": [
-        "Docker", "Kubernetes", "AWS", "Azure", "CI/CD", "Terraform", "Ansible", "Jenkins", 
-        "Prometheus", "Grafana", "Bash Scripting", "Helm", "GitOps", "OpenShift"
+      "Ansible", "ArgoCD", "Azure", "AWS", "Bash Scripting", "Buddy", "BuildKit", 
+      "Buildpacks", "Calico", "Chef", "Cilium", "CircleCI", "Cloud Native Buildpacks", 
+      "CloudFormation", "Crossplane", "Datadog", "DevSpace", "Docker", "Drone", 
+      "Earthly", "ELK", "Fluentd", "GitHub Actions", "GitLab CI", "GitOps", "Grafana", 
+      "Harbor", "Helm", "Istio", "Jenkins", "Kibana", "Knative", "Kubernetes", 
+      "Kustomize", "Linkerd", "Logstash", "Longhorn", "Minikube", "New Relic", 
+      "NixOps", "OpenShift", "OpenTelemetry", "Portainer", "Prometheus", "Pulumi", 
+      "Puppet", "Rancher", "SaltStack", "Sentry", "Skaffold", "Skupper", "Spinnaker", 
+      "Splunk", "TeamCity", "Tekton", "Terraform", "Tilt", "Travis CI", "Weave"
     ],
     "Databases": [
-        "MySQL", "PostgreSQL", "MongoDB", "Firebase", "SQLite", "Redis", "Cassandra", "OracleDB", 
-        "MariaDB", "DynamoDB", "Neo4j", "CouchDB"
+      "Airbyte", "Apache Pinot", "ArangoDB", "Beam", "BigQuery", "Bigtable", "CouchDB", 
+      "CrateDB", "Databricks", "Delta Lake", "Dremio", "DuckDB", "DynamoDB", "EdgeDB", 
+      "ETL", "Flink", "Firebase", "Firebolt", "Firestore", "GraphDB", "Hadoop", 
+      "HBase", "Hive", "InfluxDB", "Kafka", "LevelDB", "LMDB", "MariaDB", "Materialize", 
+      "MongoDB", "MySQL", "Neo4j", "NiFi", "OpenSearch", "OracleDB", "Pig", "PlanetScale", 
+      "PostgreSQL", "Presto", "Pulsar", "QuestDB", "Redis", "RethinkDB", "RocksDB", 
+      "SingleStore", "Snowflake", "Spark", "SQLite", "Storm", "SurrealDB", "Timescale", 
+      "TimescaleDB", "Trino", "Turso", "VictoriaMetrics", "Vitess", "Zookeeper"
     ],
     "Version Control": [
-        "Git", "GitHub", "GitLab", "Bitbucket", "SVN", "Mercurial"
+      "Bazaar", "Bitbucket", "CVS", "Fossil", "Git", "GitHub", "GitLab", "Mercurial", 
+      "Monotone", "Perforce", "SourceTree", "SVN"
     ],
     "Cloud Platforms": [
-        "AWS", "GCP", "Azure", "IBM Cloud", "DigitalOcean", "Heroku", "Oracle Cloud"
+      "Alibaba Cloud", "Appwrite", "AWS", "Azure", "Azure ML", "Bunnyshell", "Cloudflare", 
+      "Deta", "DigitalOcean", "Fly.io", "GCP", "Glitch", "Heroku", "IBM Cloud", 
+      "Koyeb", "Netlify", "Oracle Cloud", "Railway", "Replit", "Render", "SageMaker", 
+      "Supabase", "Tailscale", "Upstash", "Vercel", "Vertex AI", "Wasmer"
     ],
     "Cybersecurity": [
-        "Ethical Hacking", "Penetration Testing", "Cryptography", "Wireshark", "Metasploit", 
-        "Nmap", "Burp Suite", "SOC Analysis", "Incident Response"
+      "AlienVault", "Atomic Red Team", "Autopsy", "Burp Suite", "Cortex XSOAR", 
+      "Cuckoo Sandbox", "CyberChef", "Cryptography", "ClamAV", "Ethical Hacking", 
+      "Firewall Configuration", "GDPR", "Ghidra", "HIPAA", "Incident Response", 
+      "ISO 27001", "JWT", "Kismet", "MITM Proxy", "MITRE ATT&CK", "NIST", "Nmap", 
+      "OpenVAS", "OWASP", "PCI-DSS", "Penetration Testing", "Radare2", "SAML", 
+      "Secure Coding", "SIEM", "Sigma Rules", "SOC Analysis", "SOAR", "SSL", 
+      "Threat Modeling", "TLS", "Vulnerability Scanning", "VPN", "Wireshark", 
+      "YARA", "Zeek"
     ],
     "Mobile Development": [
-        "Flutter", "React Native", "Swift", "Kotlin", "Dart", "Jetpack Compose", "Xamarin"
+      "Adalo", "AppGyver", "Capacitor", "Corona SDK", "Cordova", "Dart", "Flutter", 
+      "Ionic", "Jetpack Compose", "Kivy", "Kodular", "Kotlin", "MoSync", "NativeScript", 
+      "React Native", "Sencha", "Swift", "SwiftUI", "Thunkable", "Xamarin"
     ],
     "Game Development": [
-        "Unity", "Unreal Engine", "Godot", "C#", "C++", "Blender", "Game Physics", "3D Modeling"
+      "Amethyst", "ARKit", "ARCore", "Augmented Reality", "Babylon.js", "Bevy", 
+      "Blender", "C#", "C++", "Cocos2d", "Construct", "CryEngine", "Game Physics", 
+      "GameMaker", "GDevelop", "Godot", "LibGDX", "LÖVE", "Metaverse", "MonoGame", 
+      "Phaser", "PICO-8", "SceneKit", "SpriteKit", "TIC-80", "Three.js", "Unity", 
+      "Unreal Engine", "Virtual Reality", "WebXR"
     ],
     "Blockchain": [
-        "Solidity", "Ethereum", "Hyperledger", "Smart Contracts", "Web3.js", "NFT Development"
+      "Alchemy", "Chainlink", "Ethers.js", "Ethereum", "Flow", "Foundry", "Hardhat", 
+      "Hyperledger", "Infura", "IPFS", "Moralis", "Near Protocol", "NFT Development", 
+      "OpenZeppelin", "Smart Contracts", "Solidity", "Tezos", "The Graph", "Truffle", 
+      "WAGMI", "Web3.js"
     ],
     "UI/UX Design": [
-        "Figma", "Adobe XD", "Sketch", "Wireframing", "Prototyping", "User Research"
+      "A/B Testing", "Accessibility Guidelines (WCAG)", "Accessibility Testing", 
+      "Adobe XD", "Atomic Design", "Balsamiq", "Crazy Egg", "Design Systems", 
+      "Design Tokens", "Eye Tracking", "Figma", "Framer", "FullStory", "Heuristic Evaluation", 
+      "Heatmaps", "InVision", "Lookback", "Marvel App", "Maze", "Optimal Workshop", 
+      "Prototyping", "Session Replay", "Sketch", "User Research", "User Testing", 
+      "UXCam", "UXPin", "Wireframing", "Zeplin"
     ],
     "Networking": [
-        "Cisco", "CCNA", "Network Security", "VPN", "Firewalls", "TCP/IP", "BGP", "Routing & Switching"
+      "Aircrack-ng", "BGP", "Cacti", "Cisco", "Cisco Packet Tracer", "DHCP", "DNS", 
+      "Ettercap", "Ethtool", "Firewalld", "Firewalls", "ICMP", "Iperf", "IPRoute2", 
+      "IPSec", "Iptables", "Kerberos", "Kismet", "LAN Topologies", "LDAP", "Linux", 
+      "macOS", "Nagios", "Netcat", "Netplan", "Ntopng", "Observium", "OpenWRT", 
+      "OPNsense", "pfSense", "RADIUS", "Routing & Switching", "RTOS", "SNMP", 
+      "TCP/IP", "TCPDump", "Tinc", "Traceroute", "UNIX", "VPN", "WiFi Pineapple", 
+      "Windows Server", "Wireshark CLI", "Zabbix", "ZeroTier"
     ]
-  }), []); // Empty dependency array since this is a static object
+  }), []);
 
   const [selectedSkills, setSelectedSkills] = useState([])
   const [savedSkills, setSavedSkills] = useState(null)
@@ -177,9 +240,16 @@ const SkillSelection = () => {
     setLoading(true)
 
     try {
+      // First try to get skills from userSkills collection
       const userSkillsQuery = query(collection(db, "userSkills"), where("userId", "==", auth.currentUser.uid))
       const querySnapshot = await getDocs(userSkillsQuery)
 
+      // Then get the user's profile to check skillsToAcquire
+      const userProfileRef = doc(db, "users", auth.currentUser.uid)
+      const userProfileSnap = await getDoc(userProfileRef)
+      
+      let skills = []
+      
       if (!querySnapshot.empty) {
         // If multiple documents exist, delete all but the first one
         if (querySnapshot.docs.length > 1) {
@@ -190,12 +260,27 @@ const SkillSelection = () => {
         }
         
         const docData = querySnapshot.docs[0]
-        setSavedSkills({ id: docData.id, skills: docData.data().skills })
-        setSelectedSkills(docData.data().skills)
+        skills = docData.data().skills
+        setSavedSkills({ id: docData.id, skills: skills })
+      } else if (userProfileSnap.exists() && userProfileSnap.data().skillsToAcquire) {
+        // If no userSkills document but profile has skillsToAcquire
+        const profileSkills = userProfileSnap.data().skillsToAcquire
+        skills = Array.isArray(profileSkills) ? profileSkills : profileSkills.split(',').map(s => s.trim())
+        
+        // Create a new userSkills document
+        const docRef = await addDoc(collection(db, "userSkills"), {
+          userId: auth.currentUser.uid,
+          skills: skills,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        setSavedSkills({ id: docRef.id, skills: skills })
       } else {
         setSavedSkills(null)
-        setSelectedSkills([])
+        skills = []
       }
+      
+      setSelectedSkills(skills)
     } catch (err) {
       console.error("Error fetching saved skills:", err)
     } finally {
@@ -215,7 +300,7 @@ const SkillSelection = () => {
     setLoading(true)
 
     try {
-      // First, check if user already has a skills document
+      // Update userSkills collection
       const userSkillsQuery = query(collection(db, "userSkills"), where("userId", "==", auth.currentUser.uid))
       const querySnapshot = await getDocs(userSkillsQuery)
 
@@ -238,6 +323,12 @@ const SkillSelection = () => {
         })
         setSavedSkills({ id: docRef.id, skills: selectedSkills })
       }
+
+      // Update user's profile document
+      const userProfileRef = doc(db, "users", auth.currentUser.uid)
+      await updateDoc(userProfileRef, {
+        skillsToAcquire: selectedSkills
+      })
 
       setSelectedSkills([])
       setIsEditing(false)
