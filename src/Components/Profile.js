@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import './Profile.css'; 
 
 const Profile = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [availableSkills, setAvailableSkills] = useState([]);
+  const [skillSearchTerm, setSkillSearchTerm] = useState('');
+  const [skillsToAcquireSearchTerm, setSkillsToAcquireSearchTerm] = useState('');
   const navigate = useNavigate();
   const user = auth.currentUser;
 
@@ -26,6 +29,16 @@ const Profile = () => {
     fetchUserData();
   }, [user, navigate]);
 
+  useEffect(() => {
+    fetch('/skills.txt')
+      .then(response => response.text())
+      .then(text => {
+        const skills = text.split('\n').map(skill => skill.trim()).filter(skill => skill.length > 0);
+        setAvailableSkills(skills);
+      })
+      .catch(() => setAvailableSkills([]));
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -34,16 +47,90 @@ const Profile = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (user) {
-      const docRef = doc(db, 'users', user.uid);
-      await updateDoc(docRef, formData);
-      alert('Profile updated successfully!');
-      setIsEditing(false);
+      try {
+        // Update user profile
+        const docRef = doc(db, 'users', user.uid);
+        await updateDoc(docRef, formData);
+
+        // If skillsToAcquire was updated, also update the userSkills collection
+        if (formData.skillsToAcquire) {
+          const userSkillsQuery = query(collection(db, "userSkills"), where("userId", "==", user.uid));
+          const querySnapshot = await getDocs(userSkillsQuery);
+          
+          const skills = Array.isArray(formData.skillsToAcquire) 
+            ? formData.skillsToAcquire 
+            : formData.skillsToAcquire.split(',').map(s => s.trim());
+
+          if (!querySnapshot.empty) {
+            // Update existing document
+            const existingDoc = querySnapshot.docs[0];
+            const docRefSkills = doc(db, "userSkills", existingDoc.id);
+            await updateDoc(docRefSkills, {
+              skills: skills,
+              updatedAt: new Date().toISOString()
+            });
+          } else {
+            // Create new document if none exists
+            await addDoc(collection(db, "userSkills"), {
+              userId: user.uid,
+              skills: skills,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            });
+          }
+        }
+
+        alert('Profile updated successfully!');
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        alert('Error updating profile. Please try again.');
+      }
     }
   };
 
   // Step navigation functions
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
+
+  const handleSkillSearch = (e, type) => {
+    const value = e.target.value;
+    if (type === 'current') {
+      setSkillSearchTerm(value);
+    } else {
+      setSkillsToAcquireSearchTerm(value);
+    }
+  };
+
+  const handleSkillSelect = (skill, type) => {
+    const currentSkills = (formData[type] || '').split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    if (!currentSkills.includes(skill)) {
+      const newSkills = currentSkills.length > 0
+        ? `${currentSkills.join(', ')}, ${skill}`
+        : skill;
+      setFormData(prev => ({ ...prev, [type]: newSkills }));
+    }
+
+    if (type === 'skills') {
+      setSkillSearchTerm('');
+    } else {
+      setSkillsToAcquireSearchTerm('');
+    }
+  };
+
+  const handleSkillRemove = (skillToRemove, type) => {
+    const currentSkills = (formData[type] || '').split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0 && s !== skillToRemove);
+
+    setFormData(prev => ({
+      ...prev,
+      [type]: currentSkills.join(', ')
+    }));
+  };
 
   const renderStepContent = () => {
     switch (step) {
@@ -75,9 +162,99 @@ const Profile = () => {
         return (
           <>
             <label>Skills:</label>
-            <textarea name="skills" value={formData.skills || ''} onChange={handleChange}></textarea>
+            <div className="skill-input-container">
+              <input
+                type="text"
+                placeholder="Search skills..."
+                value={skillSearchTerm}
+                onChange={(e) => handleSkillSearch(e, 'current')}
+                className="skill-search-input"
+              />
+              <div className="selected-skills">
+                {(formData.skills || '').split(',')
+                  .map(s => s.trim())
+                  .filter(s => s.length > 0)
+                  .map(skill => (
+                    <div key={skill} className="skill-tag">
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => handleSkillRemove(skill, 'skills')}
+                        className="remove-skill-btn"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+              </div>
+              {skillSearchTerm && (
+                <div className="skill-options">
+                  {availableSkills
+                    .filter(skill =>
+                      skill.toLowerCase().includes(skillSearchTerm.toLowerCase()) &&
+                      !(formData.skills || '').split(',').map(s => s.trim()).includes(skill)
+                    )
+                    .slice(0, 10)
+                    .map(skill => (
+                      <div
+                        key={skill}
+                        className="skill-option"
+                        onClick={() => handleSkillSelect(skill, 'skills')}
+                      >
+                        {skill}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
             <label>Skills to Acquire:</label>
-            <textarea name="skillsToAcquire" value={formData.skillsToAcquire || ''} onChange={handleChange}></textarea>
+            <div className="skill-input-container">
+              <input
+                type="text"
+                placeholder="Search skills..."
+                value={skillsToAcquireSearchTerm}
+                onChange={(e) => handleSkillSearch(e, 'acquire')}
+                className="skill-search-input"
+              />
+              <div className="selected-skills">
+                {(formData.skillsToAcquire || '').split(',')
+                  .map(s => s.trim())
+                  .filter(s => s.length > 0)
+                  .map(skill => (
+                    <div key={skill} className="skill-tag">
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={() => handleSkillRemove(skill, 'skillsToAcquire')}
+                        className="remove-skill-btn"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+              </div>
+              {skillsToAcquireSearchTerm && (
+                <div className="skill-options">
+                  {availableSkills
+                    .filter(skill =>
+                      skill.toLowerCase().includes(skillsToAcquireSearchTerm.toLowerCase()) &&
+                      !(formData.skillsToAcquire || '').split(',').map(s => s.trim()).includes(skill)
+                    )
+                    .slice(0, 10)
+                    .map(skill => (
+                      <div
+                        key={skill}
+                        className="skill-option"
+                        onClick={() => handleSkillSelect(skill, 'skillsToAcquire')}
+                      >
+                        {skill}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
             <label>Career Goals:</label>
             <textarea name="careerGoals" value={formData.careerGoals || ''} onChange={handleChange}></textarea>
             <label>Hobbies:</label>
