@@ -47,6 +47,10 @@ const SignUp = () => {
     countryCode: 'US'
   });
 
+  const [availableSkills, setAvailableSkills] = useState([]);
+  const [skillSearchTerm, setSkillSearchTerm] = useState('');
+  const [skillsToAcquireSearchTerm, setSkillsToAcquireSearchTerm] = useState('');
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -93,6 +97,26 @@ const SignUp = () => {
     }
   }, [formData.location]);
 
+  useEffect(() => {
+    fetch('/skills.txt')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load skills');
+        }
+        return response.text();
+      })
+      .then(text => {
+        const skills = text.split('\n')
+          .map(skill => skill.trim())
+          .filter(skill => skill.length > 0);
+        setAvailableSkills(skills);
+      })
+      .catch(error => {
+        console.error('Error loading skills:', error);
+        setAvailableSkills([]);
+      });
+  }, []);
+
   const handlePhoneChange = (value, country) => {
     setFormData(prev => ({
       ...prev,
@@ -101,12 +125,51 @@ const SignUp = () => {
     }));
   };
 
+  const handleSkillSearch = (e, type) => {
+    const value = e.target.value;
+    if (type === 'current') {
+      setSkillSearchTerm(value);
+    } else {
+      setSkillsToAcquireSearchTerm(value);
+    }
+  };
+
+  const handleSkillSelect = (skill, type) => {
+    const currentSkills = formData[type].split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+    
+    if (!currentSkills.includes(skill)) {
+      const newSkills = currentSkills.length > 0 
+        ? `${currentSkills.join(', ')}, ${skill}`
+        : skill;
+      setFormData(prev => ({ ...prev, [type]: newSkills }));
+    }
+    
+    if (type === 'current') {
+      setSkillSearchTerm('');
+    } else {
+      setSkillsToAcquireSearchTerm('');
+    }
+  };
+
+  const handleSkillRemove = (skillToRemove, type) => {
+    const currentSkills = formData[type].split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0 && s !== skillToRemove);
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      [type]: currentSkills.join(', ') 
+    }));
+  };
+
   const validateStep = (currentStep) => {
     const newErrors = {};
     const requiredFields = {
       1: ['name', 'email', 'password', 'contactNumber', 'dateOfBirth', 'location'],
       2: ['degree', 'yearOfStudy'],
-      3: ['skills', 'skillsToAcquire', 'careerGoals'],
+      3: ['skills', 'careerGoals'],
       4: [], // No required fields in step 4
       5: ['learningStyle']
     };
@@ -315,29 +378,108 @@ const SignUp = () => {
         return (
           <div className="skills-interests-dialog">
             <h3>Skills and Interests</h3>
+            
             <div className="form-group">
               <label className="required-field">Current Skills</label>
-              <textarea
-                name="skills"
-                value={formData.skills}
-                onChange={handleChange}
-                placeholder="List your current skills"
-                rows="3"
-                className={errors.skills ? 'error-field' : ''}
-              />
+              <div className="skill-input-container">
+                <input
+                  type="text"
+                  placeholder="Search skills..."
+                  value={skillSearchTerm}
+                  onChange={(e) => handleSkillSearch(e, 'current')}
+                  className="skill-search-input"
+                />
+                <div className="selected-skills">
+                  {formData.skills.split(',')
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0)
+                    .map(skill => (
+                      <div key={skill} className="skill-tag">
+                        {skill}
+                        <button
+                          type="button"
+                          onClick={() => handleSkillRemove(skill, 'skills')}
+                          className="remove-skill-btn"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                </div>
+                {skillSearchTerm && (
+                  <div className="skill-options">
+                    {availableSkills
+                      .filter(skill => 
+                        skill.toLowerCase().includes(skillSearchTerm.toLowerCase()) &&
+                        !formData.skills.split(',')
+                          .map(s => s.trim())
+                          .includes(skill)
+                      )
+                      .slice(0, 10)
+                      .map(skill => (
+                        <div
+                          key={skill}
+                          className="skill-option"
+                          onClick={() => handleSkillSelect(skill, 'skills')}
+                        >
+                          {skill}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
               {errors.skills && <span className="validation-message">{errors.skills}</span>}
             </div>
 
             <div className="form-group">
-              <label className="required-field">Skills to Acquire</label>
-              <textarea
-                name="skillsToAcquire"
-                value={formData.skillsToAcquire}
-                onChange={handleChange}
-                placeholder="List skills you want to learn"
-                rows="3"
-                className={errors.skillsToAcquire ? 'error-field' : ''}
-              />
+              <label>Skills to Acquire</label>
+              <div className="skill-input-container">
+                <input
+                  type="text"
+                  placeholder="Search skills..."
+                  value={skillsToAcquireSearchTerm}
+                  onChange={(e) => handleSkillSearch(e, 'acquire')}
+                  className="skill-search-input"
+                />
+                <div className="selected-skills">
+                  {formData.skillsToAcquire.split(',')
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0)
+                    .map(skill => (
+                      <div key={skill} className="skill-tag">
+                        {skill}
+                        <button
+                          type="button"
+                          onClick={() => handleSkillRemove(skill, 'skillsToAcquire')}
+                          className="remove-skill-btn"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                </div>
+                {skillsToAcquireSearchTerm && (
+                  <div className="skill-options">
+                    {availableSkills
+                      .filter(skill => 
+                        skill.toLowerCase().includes(skillsToAcquireSearchTerm.toLowerCase()) &&
+                        !formData.skillsToAcquire.split(',')
+                          .map(s => s.trim())
+                          .includes(skill)
+                      )
+                      .slice(0, 10)
+                      .map(skill => (
+                        <div
+                          key={skill}
+                          className="skill-option"
+                          onClick={() => handleSkillSelect(skill, 'skillsToAcquire')}
+                        >
+                          {skill}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
               {errors.skillsToAcquire && <span className="validation-message">{errors.skillsToAcquire}</span>}
             </div>
 
