@@ -1,0 +1,808 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f4f4f4;
+  overflow: visible;
+}
+
+.content {
+  width: 100%;
+  max-width: 900px; 
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: visible;
+  max-height: none;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: visible;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #000000; /* Force black text */
+}
+
+.category {
+  margin-bottom: 20px;
+}
+
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.skill-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  background: #e9ecef;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+  color: black; /* Ensure text inside the checkbox is black */
+}
+
+.skill-checkbox:hover {
+  background: #d6d8db;
+}
+
+.category-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: white; /* Set category/topic title color to white */
+  background-color: #007bff; /* Optional: Add a background for better visibility */
+  padding: 5px 10px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.3s;
+}
+
+.button-primary {
+  background: #007bff;
+  color: white;
+}
+
+.button-primary:hover {
+  background: #0056b3;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.button-edit {
+  background: #ffc107;
+  color: #333;
+}
+
+.button-edit:hover {
+  background: #e0a800;
+}
+
+.button-delete {
+  background: #dc3545;
+  color: white;
+}
+
+.button-delete:hover {
+  background: #b02a37;
+}
+
+.button-find {
+  background: #28a745;
+  color: white;
+}
+
+.button-find:hover {
+  background: #28a745; /* Same color as normal state */
+}
+
+.button-transfer {
+  background-color: #28a745;
+  color: white;
+}
+
+.button-transfer:hover {
+  background-color: #218838;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.saved-skill-item {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+}
+
+.saved-skill-text {
+  font-size: 1rem;
+  color: #333;
+  overflow-wrap: break-word;
+}
+
+.error-message {
+  color: #d9534f;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.course-list {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.course-list h3 {
+  margin-bottom: 1rem;
+  color: #000000 !important; /* Force black text */
+}
+
+.course-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.course-list li {
+  margin-bottom: 0.5rem;
+  color: #000000 !important; /* Force black text */
+}
+
+.course-list a {
+  color: #000000 !important; /* Force black text */
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.course-list a:hover {
+  color: #333333 !important; /* Slightly lighter black on hover */
+  text-decoration: underline;
+}
+
+/* Ensure all text in course items stays black */
+.course-list strong,
+.course-list p {
+  color: #000000 !important;
+}
+
+/* Override any potential theme colors for course list */
+.course-list * {
+  color: #000000 !important;
+}
+
+.skill-selection-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #000000; /* Force black text */
+}
+
+.skill-input-container {
+  margin-bottom: 2rem;
+}
+
+.skill-input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: #000000; /* Force black text */
+}
+
+.skill-input::placeholder {
+  color: #666; /* Slightly lighter black for placeholder */
+}
+
+.skill-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.skill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--input-bg);
+  border-radius: 6px;
+  color: #000000; /* Force black text */
+}
+
+.skill-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.skill-label {
+  font-size: 1rem;
+  color: #000000; /* Force black text */
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button-save {
+  background: var(--primary-color);
+  color: white;
+}
+
+.button-save:hover {
+  background: var(--primary-hover);
+}
+
+.button-cancel {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.button-cancel:hover {
+  background: var(--secondary-hover);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Keep existing button styles but ensure text inside buttons remains white */
+.button-save,
+.button-cancel {
+  color: white !important;
+}
+
+/* Ensure all text in the container remains black */
+.skill-selection-container * {
+  color: #000000;
+}
+
+/* Override any potential theme-based text colors */
+.skill-selection-container h1,
+.skill-selection-container h2,
+.skill-selection-container h3,
+.skill-selection-container p,
+.skill-selection-container span,
+.skill-selection-container label {
+  color: #000000 !important;
+}
+
+/* Ensure input text remains black */
+.skill-input,
+.skill-item input[type="text"],
+.skill-item input[type="checkbox"] + span {
+  color: #000000 !important;
+}
+
+/* Keep button text white */
+.button {
+  color: white !important;
+}
+
+.search-filter-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+}
+
+.search-container {
+  margin-bottom: 1rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #6c757d;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #212529;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.search-input::placeholder {
+  color: #6c757d;
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.category-button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #6c757d;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #212529;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-button:hover {
+  background: #e9ecef;
+  border-color: #0d6efd;
+}
+
+.category-button.active {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+
+.selection-counter {
+  text-align: center;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  color: #212529;
+  font-size: 0.9rem;
+  border: 1px solid #dee2e6;
+}
+
+/* Focus states */
+.skill-checkbox.focused,
+.category-button.focused,
+.search-input:focus {
+  outline: 2px solid #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+}
+
+/* Loading indicator */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0d6efd;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error message */
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Enhanced focus styles for keyboard navigation */
+.skill-checkbox:focus-within,
+.category-button:focus-within {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+/* Improved hover states */
+.skill-checkbox:hover,
+.category-button:hover {
+  background-color: #e9ecef;
+  transition: background-color 0.2s ease;
+}
+
+/* Active state enhancements */
+.category-button.active {
+  background-color: #0d6efd;
+  color: white;
+  font-weight: 600;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .category-filter {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .category-button {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 120px;
+  }
+  
+  .skills-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+/* Print styles */
+@media print {
+  .search-filter-section,
+  .category-filter {
+    display: none;
+  }
+  
+  .skills-grid {
+    break-inside: avoid;
+  }
+}
+
+.skills-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.selected-skills-container {
+  width: 100%;
+}
+
+.selected-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  gap: 0.5rem;
+}
+
+.remove-skill-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.remove-skill-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.add-skills-container {
+  position: relative;
+  width: 100%;
+}
+
+.add-skills-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #ffffff; /* Explicit white background */
+  border: 1px solid #dee2e6; /* Light gray border */
+  border-radius: 8px;
+  color: #000000 !important; /* Force black text */
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-skills-button:hover {
+  background-color: #007bff !important; /* Blue background on hover */
+  color: #ffffff !important; /* White text on hover */
+  border-color: #007bff !important;
+}
+
+/* Dark mode adjustments for add-skills-button */
+[data-theme="dark"] .add-skills-button {
+  background-color: #2d2d2d; /* Dark background */
+  border-color: #404040; /* Darker border */
+  color: #ffffff !important; /* White text in dark mode */
+}
+
+[data-theme="dark"] .add-skills-button:hover {
+  background-color: #007bff !important; /* Same blue in dark mode */
+  color: #ffffff !important; /* Keep white text on hover */
+  border-color: #007bff !important;
+}
+
+.skill-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.dropdown-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dropdown-search {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--input-background);
+  color: var(--text-color);
+}
+
+.dropdown-content {
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.dropdown-category {
+  margin-bottom: 1rem;
+}
+
+.category-header {
+  font-weight: 600;
+  padding: 0.5rem;
+  color: var(--text-color);
+  background-color: var(--hover-color);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.category-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dropdown-skill {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  color: var(--text-color);
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdown-skill:hover {
+  background-color: var(--hover-color);
+}
+
+.dropdown-skill.existing-skill {
+  color: #dc3545;
+  cursor: not-allowed;
+  opacity: 0.7;
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.dropdown-skill.existing-skill:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.existing-skill-message {
+  font-size: 0.8rem;
+  color: #dc3545;
+  margin-left: 0.5rem;
+}
+
+/* Dark mode adjustments for existing skills */
+[data-theme="dark"] .dropdown-skill.existing-skill {
+  color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+[data-theme="dark"] .dropdown-skill.existing-skill:hover {
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+[data-theme="dark"] .existing-skill-message {
+  color: #ff6b6b;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .skill-dropdown {
+  background-color: var(--card-background);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .dropdown-search {
+  background-color: var(--input-background);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .dropdown-skill:hover {
+  background-color: var(--hover-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .skill-dropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-height: 80vh;
+  }
+}
+
+.dropdown-skill.selected-for-transfer {
+  background-color: rgba(40, 167, 69, 0.1);
+  border: 1px solid #28a745;
+}
+
+.transfer-indicator {
+  color: #28a745;
+  margin-left: 0.5rem;
+  font-weight: bold;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .dropdown-skill.selected-for-transfer {
+  background-color: rgba(40, 167, 69, 0.2);
+  border-color: #28a745;
+}
+
+[data-theme="dark"] .transfer-indicator {
+  color: #2ecc71;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.button-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.button-primary:hover {
+  background-color: #0056b3;
+}
+
+.button-transfer {
+  background-color: #28a745;
+  color: white;
+}
+
+.button-transfer:hover {
+  background-color: #218838;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Remove hover effect for Get Courses button */
+.button-find {
+  background: #28a745;
+  color: white;
+}
+
+.button-find:hover {
+  background: #28a745; /* Same color as normal state */
+}
+
+.selected-skills-label, .selected-skills-label *, .skills-section h3 {
+  color: #000 !important;
+}
