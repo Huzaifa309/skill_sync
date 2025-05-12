@@ -30,42 +30,15 @@ const Login = () => {
   const [staySignedIn, setStaySignedIn] = useState(false);
   const navigate = useNavigate();
 
-  // Check persistence state on mount
-  useEffect(() => {
-    const checkPersistence = async () => {
-      try {
-        // Force session persistence by default
-        await setPersistence(auth, browserSessionPersistence);
-        
-        // If there's a user but staySignedIn is false, sign them out
-        if (auth.currentUser && !staySignedIn) {
-          await auth.signOut();
-        }
-      } catch (error) {
-        console.error("Error setting persistence:", error);
-      }
-    };
-    
-    checkPersistence();
-  }, []);
-
   // Set up auth state listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // If user exists but staySignedIn is false, sign them out
-        if (!staySignedIn) {
-          await auth.signOut();
-          setAuthState("unauthenticated");
-          return;
-        }
-
+        // Remove forced sign-out based on staySignedIn
         setAuthState("authenticated");
-        
         try {
           const userDoc = doc(db, 'users', user.uid);
           const docSnap = await getDoc(userDoc);
-          
           if (!docSnap.exists()) {
             await setDoc(userDoc, {
               email: user.email,
@@ -82,15 +55,13 @@ const Login = () => {
         } catch (error) {
           console.error('Firestore update error:', error);
         }
-        
         navigate("/dashboard");
       } else {
         setAuthState("unauthenticated");
       }
     });
-
     return () => unsubscribe();
-  }, [navigate, staySignedIn]);
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
