@@ -8,6 +8,7 @@ import { FaChartLine, FaRobot, FaUserGraduate, FaCog, FaCommentDots } from 'reac
 import SkillSelection from './SkillSelection';
 import ProfileManagement from './Profile';
 import Chatbot from './Chatbot';
+import PredictArima from './predict_arima';
 
 const Dashboard = () => {
   const [userName, setUserName] = useState('User');
@@ -86,6 +87,8 @@ const Dashboard = () => {
         return <SkillSelection />;
       case 'profile':
         return <ProfileManagement />;
+      case 'predict':
+        return <PredictArima />;
       default:
         return null;
     }
@@ -103,16 +106,22 @@ const Dashboard = () => {
             Overview
           </button>
           <button
+            onClick={() => setActiveTab('predict')}
+            className={`nav-tab ${activeTab === 'predict' ? 'active' : ''}`}
+          >
+            Predict Skills
+          </button>
+          <button
             onClick={() => setActiveTab('skills')}
             className={`nav-tab ${activeTab === 'skills' ? 'active' : ''}`}
           >
-            Skills
+            Learn New Skills
           </button>
           <button
             onClick={() => setActiveTab('profile')}
             className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`}
           >
-            <FaCog className="nav-icon" /> Profile
+            <FaCog className="nav-icon" /> Profile Management
           </button>
         </div>
         <div className="header-right">
