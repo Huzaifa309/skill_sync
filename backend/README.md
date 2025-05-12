@@ -1,6 +1,6 @@
-# ARIMA Forecast API
+# 2 Forecast API
 
-A FastAPI backend service that serves forecasts from pre-trained ARIMA models with Firebase Firestore caching.
+A FastAPI backend service that serves forecasts from pre-trained ARIMA and N-Beats models with Firebase Firestore caching.
 
 ## Setup
 
@@ -17,6 +17,10 @@ pip install -r requirements.txt
 3. Place your ARIMA models:
    - Save your trained ARIMA models in the `models/` directory
    - Name them as `{skill}_arima.pkl` (e.g., `python_arima.pkl`)
+  
+3. Place your NBEATS models:  
+   - Training is slightly different for Nbeats model
+   - It is trained collectively with separate files for each h (year value)
 
 ## Running the API
 
