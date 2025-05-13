@@ -8,9 +8,18 @@ Profile Management, Dynamic Skill Management 2 iterations and Virtual Career Cou
 
 ### What is pending
 
-Implementation of AI model 
-Predictive analysis as well as AI based Career Recommendation is pending
+Implementation of AI based Career Recommendation Model 
 
-### How to check
-
-Clone this repo, initialize Node js and then run npm start
+## To run
+Paste this in the folder
+Open terminal run this command
+'''
+npm install
+npm run build
+'''
+Cut build from here and paste in backend folder
+Then run this command
+'''
+uvicorn main:app --reload
+'''
+Go to localhost:8000 and refresh your browser
