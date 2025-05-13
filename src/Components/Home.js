@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaUserPlus, FaRocket, FaChartLine, FaComments, FaGraduationCap } from 'react-icons/fa';
@@ -111,4 +112,3 @@ const Home = () => {
 };
 
 export default Home;
-
