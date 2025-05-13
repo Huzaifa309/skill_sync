@@ -92,7 +92,8 @@ const Dashboard = () => {
 
   const filteredSkills = availableSkills.filter(skill => 
     skill.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    !selectedSkills.includes(skill)
+    !selectedSkills.includes(skill) &&
+    !skillsToAcquire.includes(skill)
   );
 
   const handleAddSkill = (skill) => {
@@ -105,6 +106,7 @@ const Dashboard = () => {
 
   const handleRemoveSkill = (skillToRemove) => {
     setSelectedSkills(selectedSkills.filter(skill => skill !== skillToRemove));
+    setSkillsToAcquire(skillsToAcquire.filter(skill => skill !== skillToRemove));
   };
 
   const handleLogout = async () => {
@@ -233,71 +235,76 @@ const Dashboard = () => {
               </button>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '30px', position: 'relative' }}>
-                {selectedSkills.map((skill) => (
-                  <div
-                    key={skill}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      backgroundColor: isDarkMode ? '#444' : '#f0f0f0',
-                      padding: '5px 10px',
-                      borderRadius: '15px',
-                      color: isDarkMode ? 'white' : 'black',
-                      fontWeight: 500
-                    }}
-                  >
-                    {skill}
-                    <button
-                      onClick={() => handleRemoveSkill(skill)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: isDarkMode ? 'white' : 'black',
-                        cursor: 'pointer',
-                        padding: '2px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <FaTimes size={12} />
-                    </button>
-                  </div>
-                ))}
-                {skillsToAcquire.map((skill) => (
-                  <div
-                    key={skill}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      backgroundColor: isDarkMode ? '#2c5282' : '#e6f3ff',
-                      padding: '5px 10px',
-                      borderRadius: '15px',
-                      color: isDarkMode ? 'white' : '#2c5282',
-                      fontWeight: 500,
-                      border: '1px dashed #4299e1'
-                    }}
-                  >
-                    {skill}
-                    <button
-                      onClick={() => handleRemoveSkill(skill)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: isDarkMode ? 'white' : '#2c5282',
-                        cursor: 'pointer',
-                        padding: '2px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <FaTimes size={12} />
-                    </button>
-                  </div>
-                ))}
+                {/* Group skills into rows of 5 */}
+                {(() => {
+                  const allSkills = [
+                    ...selectedSkills.map(skill => ({ skill, type: 'current' })),
+                    ...skillsToAcquire.map(skill => ({ skill, type: 'acquire' }))
+                  ];
+                  const rows = [];
+                  for (let i = 0; i < allSkills.length; i += 5) {
+                    rows.push(allSkills.slice(i, i + 5));
+                  }
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '30px', position: 'relative' }}>
+                      {rows.map((row, rowIdx) => (
+                        <div key={rowIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          {row.map(({ skill, type }) => (
+                            <div
+                              key={skill}
+                              style={type === 'current' ? {
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                backgroundColor: isDarkMode ? '#444' : '#f0f0f0',
+                                padding: '5px 10px',
+                                borderRadius: '15px',
+                                color: isDarkMode ? 'white' : 'black',
+                                fontWeight: 500
+                              } : {
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                backgroundColor: isDarkMode ? '#2c5282' : '#e6f3ff',
+                                padding: '5px 10px',
+                                borderRadius: '15px',
+                                color: isDarkMode ? 'white' : '#2c5282',
+                                fontWeight: 500,
+                                border: '1px dashed #4299e1'
+                              }}
+                            >
+                              {skill}
+                              <button
+                                onClick={() => handleRemoveSkill(skill)}
+                                style={type === 'current' ? {
+                                  background: 'none',
+                                  border: 'none',
+                                  color: isDarkMode ? 'white' : 'black',
+                                  cursor: 'pointer',
+                                  padding: '2px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                } : {
+                                  background: 'none',
+                                  border: 'none',
+                                  color: isDarkMode ? 'white' : '#2c5282',
+                                  cursor: 'pointer',
+                                  padding: '2px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <FaTimes size={12} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
                 {/* + button and dropdown in a relatively positioned container */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
                   <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -419,11 +426,10 @@ const Dashboard = () => {
                           border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
                           textAlign: 'left',
                           lineHeight: 1.4,
-                          marginLeft: '8px'
+                          marginLeft: '8px',
+                          fontWeight: 'bold'
                         }}>
-                          {['You can add or', 'remove more skills', 'here!'].map((line, idx) => (
-                            <span key={idx}>{line}<br /></span>
-                          ))}
+                          {'You can add\nor remove more\nskills here!'}
                         </div>
                       </div>
                     )}
