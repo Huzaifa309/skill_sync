@@ -225,8 +225,8 @@ const Dashboard = () => {
                     </button>
                   </div>
                 ))}
-                {/* + button, arrow, and tooltip in a horizontal row, with dropdown */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px', position: 'relative' }}>
+                {/* + button and dropdown in a relatively positioned container */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
                   <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                     <button
                       ref={plusButtonRef}
@@ -314,38 +314,47 @@ const Dashboard = () => {
                         </div>
                       </div>
                     )}
-                  </div>
-                  {/* Arrow and tooltip, only when Chatbot is not open and dropdown is not open */}
-                  {!showSkillsDropdown && !showChatbot && (
-                    <>
-                      <img
-                        src={arrowImg}
-                        alt="arrow"
-                        style={{
-                          width: '38px',
-                          height: '38px',
-                          objectFit: 'contain',
-                          display: 'block',
-                        }}
-                      />
+                    {/* Arrow and tooltip, absolutely positioned to the right of the + button, vertically centered */}
+                    {!showSkillsDropdown && !showChatbot && (
                       <div style={{
-                        background: isDarkMode ? '#232323' : '#fff',
-                        color: isDarkMode ? 'white' : 'black',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.13)',
-                        padding: '8px 16px',
-                        fontSize: '0.95rem',
-                        whiteSpace: 'pre-line',
-                        border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
-                        textAlign: 'left',
-                        lineHeight: 1.4
+                        position: 'absolute',
+                        left: '110%',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        zIndex: 1100
                       }}>
-                        {['You can add or', 'remove more skills', 'here!'].map((line, idx) => (
-                          <span key={idx}>{line}<br /></span>
-                        ))}
+                        <img
+                          src={arrowImg}
+                          alt="arrow"
+                          style={{
+                            width: '38px',
+                            height: '38px',
+                            objectFit: 'contain',
+                            display: 'block',
+                          }}
+                        />
+                        <div style={{
+                          background: isDarkMode ? '#232323' : '#fff',
+                          color: isDarkMode ? 'white' : 'black',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.13)',
+                          padding: '8px 16px',
+                          fontSize: '0.95rem',
+                          whiteSpace: 'pre-line',
+                          border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
+                          textAlign: 'left',
+                          lineHeight: 1.4,
+                          marginLeft: '8px'
+                        }}>
+                          {['You can add or', 'remove more skills', 'here!'].map((line, idx) => (
+                            <span key={idx}>{line}<br /></span>
+                          ))}
+                        </div>
                       </div>
-                    </>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -442,73 +451,81 @@ const Dashboard = () => {
           zIndex: 1201,
           display: 'flex',
           alignItems: 'center',
-          flexDirection: 'row',
         }}
       >
+        {/* Prompt and arrow absolutely positioned to the left of chat button */}
         {showChatbotPrompt && (
-          <div style={{
-            background: isDarkMode ? '#232323' : '#fff',
-            color: isDarkMode ? 'white' : 'black',
-            borderRadius: '16px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
-            padding: '18px 24px 18px 18px',
-            minWidth: '260px',
-            maxWidth: '320px',
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '1rem',
-            border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
-            transition: 'all 0.2s',
-            marginRight: '16px',
-          }}>
-            <span style={{ flex: 1 }}>
-              {chatbotPrompts[promptIndex]}
-            </span>
-            <button
-              onClick={() => setShowChatbotPrompt(false)}
+          <>
+            <div
               style={{
-                background: 'none',
-                border: 'none',
-                color: isDarkMode ? '#fff' : '#333',
-                fontSize: '1.2rem',
-                marginLeft: '10px',
-                cursor: 'pointer',
-                padding: 0,
-                lineHeight: 1
+                position: 'absolute',
+                right: '90px', // width of arrow + button + margin
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: isDarkMode ? '#232323' : '#fff',
+                color: isDarkMode ? 'white' : 'black',
+                borderRadius: '16px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+                padding: '18px 24px 18px 18px',
+                minWidth: '260px',
+                maxWidth: '320px',
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '1rem',
+                border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
+                transition: 'all 0.2s',
               }}
-              aria-label="Close prompt"
             >
-              ×
-            </button>
-          </div>
+              <span style={{ flex: 1 }}>
+                {chatbotPrompts[promptIndex]}
+              </span>
+              <button
+                onClick={() => setShowChatbotPrompt(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: isDarkMode ? '#fff' : '#333',
+                  fontSize: '1.2rem',
+                  marginLeft: '10px',
+                  cursor: 'pointer',
+                  padding: 0,
+                  lineHeight: 1
+                }}
+                aria-label="Close prompt"
+              >
+                ×
+              </button>
+            </div>
+            <img
+              src={arrowImg}
+              alt="arrow"
+              style={{
+                width: '38px',
+                height: '38px',
+                objectFit: 'contain',
+                display: 'block',
+                marginRight: '8px',
+                marginLeft: '8px',
+              }}
+            />
+          </>
         )}
-        {showChatbotPrompt && (
-          <img
-            src={arrowImg}
-            alt="arrow"
-            style={{
-              width: '56px',
-              height: '56px',
-              objectFit: 'contain',
-              marginRight: '8px',
-              marginLeft: showChatbotPrompt ? '0' : '8px',
-              display: 'block',
+        {/* Only show chat button when chatbot is closed */}
+        {!showChatbot && (
+          <button 
+            className="chat-button" 
+            onClick={() => {
+              setShowChatbotPrompt(false);
+              setShowChatbot(!showChatbot);
             }}
-          />
+            style={{
+              position: 'static',
+              zIndex: 1201
+            }}
+          >
+            <FaCommentDots />
+          </button>
         )}
-        <button 
-          className="chat-button" 
-          onClick={() => {
-            setShowChatbotPrompt(false);
-            setShowChatbot(!showChatbot);
-          }}
-          style={{
-            position: 'static', // static because parent is fixed
-            zIndex: 1201
-          }}
-        >
-          <FaCommentDots />
-        </button>
       </div>
 
       {showChatbot && <Chatbot onClose={() => setShowChatbot(false)} userDetails={userDetails} />}
