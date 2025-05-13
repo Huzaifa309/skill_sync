@@ -7,9 +7,11 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.9",
+    "chart.js": "^4.4.9",
     "firebase": "^11.0.1",
     "prettier": "^3.5.2",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
     "react-phone-input-2": "^2.15.1",
@@ -20,7 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && node copy-static.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
