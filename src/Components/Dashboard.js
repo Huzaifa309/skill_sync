@@ -225,38 +225,96 @@ const Dashboard = () => {
                     </button>
                   </div>
                 ))}
-                {/* + button, arrow, and tooltip in a horizontal row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
-                  <button
-                    ref={plusButtonRef}
-                    onClick={() => setShowSkillsDropdown(!showSkillsDropdown)}
-                    style={{
-                      background: 'transparent',
-                      border: '2px solid #007BFF',
-                      color: isDarkMode ? 'white' : 'black',
-                      fontSize: '1.2rem',
-                      cursor: 'pointer',
-                      padding: '5px 12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '50%',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-                      transition: 'all 0.2s',
-                      marginLeft: '5px',
-                    }}
-                    onMouseOver={e => {
-                      e.target.style.background = isDarkMode ? '#333' : '#e6f0ff';
-                      e.target.style.borderColor = '#0056b3';
-                    }}
-                    onMouseOut={e => {
-                      e.target.style.background = 'transparent';
-                      e.target.style.borderColor = '#007BFF';
-                    }}
-                    aria-label="Add skill"
-                  >
-                    <FaPlus />
-                  </button>
+                {/* + button, arrow, and tooltip in a horizontal row, with dropdown */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px', position: 'relative' }}>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <button
+                      ref={plusButtonRef}
+                      onClick={() => setShowSkillsDropdown(!showSkillsDropdown)}
+                      style={{
+                        background: 'transparent',
+                        border: '2px solid #007BFF',
+                        color: isDarkMode ? 'white' : 'black',
+                        fontSize: '1.2rem',
+                        cursor: 'pointer',
+                        padding: '5px 12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '50%',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                        transition: 'all 0.2s',
+                        marginLeft: '5px',
+                      }}
+                      onMouseOver={e => {
+                        e.target.style.background = isDarkMode ? '#333' : '#e6f0ff';
+                        e.target.style.borderColor = '#0056b3';
+                      }}
+                      onMouseOut={e => {
+                        e.target.style.background = 'transparent';
+                        e.target.style.borderColor = '#007BFF';
+                      }}
+                      aria-label="Add skill"
+                    >
+                      <FaPlus />
+                    </button>
+                    {/* Skills dropdown, absolutely positioned below the + button */}
+                    {showSkillsDropdown && (
+                      <div
+                        ref={dropdownRef}
+                        style={{
+                          position: 'absolute',
+                          top: '120%',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          backgroundColor: isDarkMode ? '#333' : 'white',
+                          border: '1px solid #ccc',
+                          borderRadius: '8px',
+                          padding: '10px',
+                          zIndex: 1000,
+                          width: '300px',
+                          maxHeight: '300px',
+                          overflowY: 'auto',
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          placeholder="Search skills..."
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            marginBottom: '10px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc'
+                          }}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                          {filteredSkills.map(skill => (
+                            <button
+                              key={skill}
+                              onClick={() => handleAddSkill(skill)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: '8px',
+                                textAlign: 'left',
+                                cursor: 'pointer',
+                                color: isDarkMode ? 'white' : 'black',
+                                ':hover': {
+                                  backgroundColor: isDarkMode ? '#444' : '#f0f0f0'
+                                }
+                              }}
+                            >
+                              {skill}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   {/* Arrow and tooltip, only when Chatbot is not open and dropdown is not open */}
                   {!showSkillsDropdown && !showChatbot && (
                     <>
