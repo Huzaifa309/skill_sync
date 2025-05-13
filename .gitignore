@@ -11,6 +11,8 @@
 # production
 /build
 
+backend/model_randomForest/
+
 # misc
 .env
 .DS_Store

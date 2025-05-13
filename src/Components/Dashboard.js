@@ -225,28 +225,8 @@ const Dashboard = () => {
                     </button>
                   </div>
                 ))}
-                {/* + button, always separate from skills */}
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  {/* Tooltip popup */}
-                  {!showSkillsDropdown && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '120%',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      background: isDarkMode ? '#232323' : '#fff',
-                      color: isDarkMode ? 'white' : 'black',
-                      borderRadius: '8px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.13)',
-                      padding: '8px 16px',
-                      fontSize: '0.95rem',
-                      whiteSpace: 'nowrap',
-                      border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
-                      zIndex: 1100
-                    }}>
-                      You can add or remove more skills here!
-                    </div>
-                  )}
+                {/* + button, arrow, and tooltip in a horizontal row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
                   <button
                     ref={plusButtonRef}
                     onClick={() => setShowSkillsDropdown(!showSkillsDropdown)}
@@ -277,61 +257,36 @@ const Dashboard = () => {
                   >
                     <FaPlus />
                   </button>
-                  {/* Skills dropdown */}
-                  {showSkillsDropdown && (
-                    <div
-                      ref={dropdownRef}
-                      style={{
-                        position: 'absolute',
-                        top: '120%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: isDarkMode ? '#333' : 'white',
-                        border: '1px solid #ccc',
-                        borderRadius: '8px',
-                        padding: '10px',
-                        zIndex: 1000,
-                        width: '300px',
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search skills..."
+                  {/* Arrow and tooltip, only when Chatbot is not open and dropdown is not open */}
+                  {!showSkillsDropdown && !showChatbot && (
+                    <>
+                      <img
+                        src={arrowImg}
+                        alt="arrow"
                         style={{
-                          width: '100%',
-                          padding: '8px',
-                          marginBottom: '10px',
-                          borderRadius: '4px',
-                          border: '1px solid #ccc'
+                          width: '38px',
+                          height: '38px',
+                          objectFit: 'contain',
+                          display: 'block',
                         }}
                       />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        {filteredSkills.map(skill => (
-                          <button
-                            key={skill}
-                            onClick={() => handleAddSkill(skill)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              padding: '8px',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              color: isDarkMode ? 'white' : 'black',
-                              ':hover': {
-                                backgroundColor: isDarkMode ? '#444' : '#f0f0f0'
-                              }
-                            }}
-                          >
-                            {skill}
-                          </button>
+                      <div style={{
+                        background: isDarkMode ? '#232323' : '#fff',
+                        color: isDarkMode ? 'white' : 'black',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.13)',
+                        padding: '8px 16px',
+                        fontSize: '0.95rem',
+                        whiteSpace: 'pre-line',
+                        border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
+                        textAlign: 'left',
+                        lineHeight: 1.4
+                      }}>
+                        {['You can add or', 'remove more skills', 'here!'].map((line, idx) => (
+                          <span key={idx}>{line}<br /></span>
                         ))}
                       </div>
-                    </div>
+                    </>
                   )}
                 </div>
               </div>
