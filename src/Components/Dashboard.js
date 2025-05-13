@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
   const [availableSkills, setAvailableSkills] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
+  const [skillsToAcquire, setSkillsToAcquire] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showChatbotPrompt, setShowChatbotPrompt] = useState(true);
   const [promptIndex, setPromptIndex] = useState(0);
@@ -122,23 +123,62 @@ const Dashboard = () => {
   }, [showChatbot, showChatbotPrompt]);
 
   const handleLoadSkills = async () => {
-    if (!auth.currentUser) return;
+    console.log('handleLoadSkills called');
+    if (!auth.currentUser) {
+      console.log('No current user found');
+      return;
+    }
     try {
-      // Try to fetch from userSkills collection (like in SkillSelection.js)
-      const userSkillsQuery = query(
-        collection(db, 'userSkills'),
-        where('userId', '==', auth.currentUser.uid)
-      );
-      const querySnapshot = await getDocs(userSkillsQuery);
-      if (!querySnapshot.empty) {
-        const skillsData = querySnapshot.docs[0].data();
-        setSelectedSkills(skillsData.skills || []);
-      } else {
-        setSelectedSkills([]);
+      console.log('Fetching user document for:', auth.currentUser.uid);
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      const userData = userDoc.data();
+      console.log('User data:', userData);
+      
+      let currentSkills = [];
+      let toAcquireSkills = [];
+      
+      // Add current skills from user profile
+      if (userData && userData.skills) {
+        console.log('Current skills:', userData.skills);
+        
+        // Handle different data types for skills
+        if (typeof userData.skills === 'string') {
+          currentSkills = userData.skills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
+        } else if (Array.isArray(userData.skills)) {
+          currentSkills = userData.skills;
+        } else if (typeof userData.skills === 'object') {
+          currentSkills = Object.values(userData.skills);
+        }
       }
+      
+      // Add skills to acquire if they exist
+      if (userData && userData.skillsToAcquire) {
+        console.log('Skills to acquire:', userData.skillsToAcquire);
+        
+        // Handle different data types for skillsToAcquire
+        if (typeof userData.skillsToAcquire === 'string') {
+          toAcquireSkills = userData.skillsToAcquire.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
+        } else if (Array.isArray(userData.skillsToAcquire)) {
+          toAcquireSkills = userData.skillsToAcquire;
+        } else if (typeof userData.skillsToAcquire === 'object') {
+          toAcquireSkills = Object.values(userData.skillsToAcquire);
+        }
+      }
+      
+      // Ensure all skills are unique and sorted
+      currentSkills = [...new Set(currentSkills)].sort();
+      toAcquireSkills = [...new Set(toAcquireSkills)].sort();
+      
+      console.log('Current skills:', currentSkills);
+      console.log('Skills to acquire:', toAcquireSkills);
+      
+      setSelectedSkills(currentSkills);
+      setSkillsToAcquire(toAcquireSkills);
       setSkillsLoaded(true);
     } catch (error) {
+      console.error('Error loading skills:', error);
       setSelectedSkills([]);
+      setSkillsToAcquire([]);
       setSkillsLoaded(true);
     }
   };
@@ -189,7 +229,7 @@ const Dashboard = () => {
                 }}
                 onClick={handleLoadSkills}
               >
-                Load your current skills
+                Load all your skills (current & to acquire)
               </button>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '30px', position: 'relative' }}>
@@ -214,6 +254,39 @@ const Dashboard = () => {
                         background: 'none',
                         border: 'none',
                         color: isDarkMode ? 'white' : 'black',
+                        cursor: 'pointer',
+                        padding: '2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                ))}
+                {skillsToAcquire.map((skill) => (
+                  <div
+                    key={skill}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      backgroundColor: isDarkMode ? '#2c5282' : '#e6f3ff',
+                      padding: '5px 10px',
+                      borderRadius: '15px',
+                      color: isDarkMode ? 'white' : '#2c5282',
+                      fontWeight: 500,
+                      border: '1px dashed #4299e1'
+                    }}
+                  >
+                    {skill}
+                    <button
+                      onClick={() => handleRemoveSkill(skill)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: isDarkMode ? 'white' : '#2c5282',
                         cursor: 'pointer',
                         padding: '2px',
                         display: 'flex',
@@ -363,7 +436,7 @@ const Dashboard = () => {
                 style={{
                   padding: '15px 30px',
                   fontSize: '1.1rem',
-                  backgroundColor: '#FF0000',
+                  backgroundColor: '#28a745',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -373,8 +446,8 @@ const Dashboard = () => {
                   minWidth: '320px',
                   fontWeight: 500
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#cc0000'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#FF0000'}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
               >
                 Get Career Recommendation
               </button>
