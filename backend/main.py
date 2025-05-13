@@ -166,6 +166,11 @@ async def forecast(request: ForecastRequest):
 build_path = os.path.join(os.path.dirname(__file__), "build")
 app.mount("/static", StaticFiles(directory=os.path.join(build_path, "static")), name="static")
 
+# Ensure skills.txt is accessible
+@app.get("/skills.txt")
+async def get_skills():
+    return FileResponse(os.path.join(build_path, "static", "skills.txt"))
+
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):
     return FileResponse(os.path.join(build_path, "index.html"))
