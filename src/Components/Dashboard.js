@@ -185,6 +185,16 @@ const Dashboard = () => {
     }
   };
 
+  const handleToggleSkills = async () => {
+    if (!skillsLoaded) {
+      await handleLoadSkills();
+    } else {
+      setSkillsLoaded(false);
+      setSelectedSkills([]);
+      setSkillsToAcquire([]);
+    }
+  };
+
   // Hide dropdown when clicking outside of dropdown or + button
   useEffect(() => {
     if (showSkillsDropdown) {
@@ -215,228 +225,96 @@ const Dashboard = () => {
             height: '80vh',
             gap: '20px'
           }}>
-            {!skillsLoaded ? (
-              <button
-                style={{
-                  padding: '15px 30px',
-                  fontSize: '1.1rem',
-                  backgroundColor: '#007BFF',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  transition: 'all 0.3s ease',
-                  fontWeight: 500
-                }}
-                onClick={handleLoadSkills}
-              >
-                Load all your skills (current & to acquire)
-              </button>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '30px', position: 'relative' }}>
-                {/* Group skills into rows of 5 */}
-                {(() => {
-                  const allSkills = [
-                    ...selectedSkills.map(skill => ({ skill, type: 'current' })),
-                    ...skillsToAcquire.map(skill => ({ skill, type: 'acquire' }))
-                  ];
-                  const rows = [];
-                  for (let i = 0; i < allSkills.length; i += 5) {
-                    rows.push(allSkills.slice(i, i + 5));
-                  }
-                  return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '30px', position: 'relative' }}>
-                      {rows.map((row, rowIdx) => (
-                        <div key={rowIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          {row.map(({ skill, type }) => (
-                            <div
-                              key={skill}
-                              style={type === 'current' ? {
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                backgroundColor: isDarkMode ? '#444' : '#f0f0f0',
-                                padding: '5px 10px',
-                                borderRadius: '15px',
-                                color: isDarkMode ? 'white' : 'black',
-                                fontWeight: 500
-                              } : {
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                backgroundColor: isDarkMode ? '#2c5282' : '#e6f3ff',
-                                padding: '5px 10px',
-                                borderRadius: '15px',
-                                color: isDarkMode ? 'white' : '#2c5282',
-                                fontWeight: 500,
-                                border: '1px dashed #4299e1'
-                              }}
-                            >
-                              {skill}
-                              <button
-                                onClick={() => handleRemoveSkill(skill)}
-                                style={type === 'current' ? {
-                                  background: 'none',
-                                  border: 'none',
-                                  color: isDarkMode ? 'white' : 'black',
-                                  cursor: 'pointer',
-                                  padding: '2px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                } : {
-                                  background: 'none',
-                                  border: 'none',
-                                  color: isDarkMode ? 'white' : '#2c5282',
-                                  cursor: 'pointer',
-                                  padding: '2px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                              >
-                                <FaTimes size={12} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-                {/* + button and dropdown in a relatively positioned container */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <button
-                      ref={plusButtonRef}
-                      onClick={() => setShowSkillsDropdown(!showSkillsDropdown)}
-                      style={{
-                        background: 'transparent',
-                        border: '2px solid #007BFF',
-                        color: isDarkMode ? 'white' : 'black',
-                        fontSize: '1.2rem',
-                        cursor: 'pointer',
-                        padding: '5px 12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '50%',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-                        transition: 'all 0.2s',
-                        marginLeft: '5px',
-                      }}
-                      onMouseOver={e => {
-                        e.target.style.background = isDarkMode ? '#333' : '#e6f0ff';
-                        e.target.style.borderColor = '#0056b3';
-                      }}
-                      onMouseOut={e => {
-                        e.target.style.background = 'transparent';
-                        e.target.style.borderColor = '#007BFF';
-                      }}
-                      aria-label="Add skill"
-                    >
-                      <FaPlus />
-                    </button>
-                    {/* Skills dropdown, absolutely positioned below the + button */}
-                    {showSkillsDropdown && (
-                      <div
-                        ref={dropdownRef}
-                        style={{
-                          position: 'absolute',
-                          top: '120%',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          backgroundColor: isDarkMode ? '#333' : 'white',
-                          border: '1px solid #ccc',
-                          borderRadius: '8px',
-                          padding: '10px',
-                          zIndex: 1000,
-                          width: '300px',
-                          maxHeight: '300px',
-                          overflowY: 'auto',
-                          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        <input
-                          type="text"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          placeholder="Search skills..."
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            marginBottom: '10px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc'
-                          }}
-                        />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                          {filteredSkills.map(skill => (
+            {/* Skills block: only show when skillsLoaded is true */}
+            {skillsLoaded && (
+              (() => {
+                const allSkills = [
+                  ...selectedSkills.map(skill => ({ skill, type: 'current' })),
+                  ...skillsToAcquire.map(skill => ({ skill, type: 'acquire' }))
+                ];
+                const rows = [];
+                for (let i = 0; i < allSkills.length; i += 5) {
+                  rows.push(allSkills.slice(i, i + 5));
+                }
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '30px', position: 'relative' }}>
+                    {rows.map((row, rowIdx) => (
+                      <div key={rowIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {row.map(({ skill, type }) => (
+                          <div
+                            key={skill}
+                            style={type === 'current' ? {
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              backgroundColor: isDarkMode ? '#444' : '#f0f0f0',
+                              padding: '5px 10px',
+                              borderRadius: '15px',
+                              color: isDarkMode ? 'white' : 'black',
+                              fontWeight: 500
+                            } : {
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              backgroundColor: isDarkMode ? '#2c5282' : '#e6f3ff',
+                              padding: '5px 10px',
+                              borderRadius: '15px',
+                              color: isDarkMode ? 'white' : '#2c5282',
+                              fontWeight: 500,
+                              border: '1px dashed #4299e1'
+                            }}
+                          >
+                            {skill}
                             <button
-                              key={skill}
-                              onClick={() => handleAddSkill(skill)}
-                              style={{
+                              onClick={() => handleRemoveSkill(skill)}
+                              style={type === 'current' ? {
                                 background: 'none',
                                 border: 'none',
-                                padding: '8px',
-                                textAlign: 'left',
-                                cursor: 'pointer',
                                 color: isDarkMode ? 'white' : 'black',
-                                ':hover': {
-                                  backgroundColor: isDarkMode ? '#444' : '#f0f0f0'
-                                }
+                                cursor: 'pointer',
+                                padding: '2px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              } : {
+                                background: 'none',
+                                border: 'none',
+                                color: isDarkMode ? 'white' : '#2c5282',
+                                cursor: 'pointer',
+                                padding: '2px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                               }}
                             >
-                              {skill}
+                              <FaTimes size={12} />
                             </button>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                    {/* Arrow and tooltip, absolutely positioned to the right of the + button, vertically centered */}
-                    {!showSkillsDropdown && !showChatbot && (
-                      <div style={{
-                        position: 'absolute',
-                        left: '110%',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        zIndex: 1100
-                      }}>
-                        <img
-                          src={arrowImg}
-                          alt="arrow"
-                          style={{
-                            width: '38px',
-                            height: '38px',
-                            objectFit: 'contain',
-                            display: 'block',
-                          }}
-                        />
-                        <div style={{
-                          background: isDarkMode ? '#232323' : '#fff',
-                          color: isDarkMode ? 'white' : 'black',
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.13)',
-                          padding: '8px 16px',
-                          fontSize: '0.95rem',
-                          whiteSpace: 'pre-line',
-                          border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
-                          textAlign: 'left',
-                          lineHeight: 1.4,
-                          marginLeft: '8px',
-                          fontWeight: 'bold'
-                        }}>
-                          {'You can add\nor remove more\nskills here!'}
-                        </div>
-                      </div>
-                    )}
+                    ))}
                   </div>
-                </div>
-              </div>
+                );
+              })()
             )}
+            {/* The toggle button is always visible */}
+            <button
+              style={{
+                padding: '15px 30px',
+                fontSize: '1.1rem',
+                backgroundColor: '#007BFF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                transition: 'all 0.3s ease',
+                fontWeight: 500
+              }}
+              onClick={handleToggleSkills}
+            >
+              {skillsLoaded ? 'Close Skills' : 'Load all your skills (current & to acquire)'}
+            </button>
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
               <button 
                 style={{
