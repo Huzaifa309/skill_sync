@@ -13,13 +13,13 @@ Implementation of AI based Career Recommendation Model
 ## To run
 Paste this in the folder
 Open terminal run this command
-'''
+```
 npm install
 npm run build
-'''
+```
 Cut build from here and paste in backend folder
 Then run this command
-'''
+```
 uvicorn main:app --reload
-'''
+```
 Go to localhost:8000 and refresh your browser
