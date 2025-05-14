@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [showChatbotPrompt, setShowChatbotPrompt] = useState(true);
   const [promptIndex, setPromptIndex] = useState(0);
   const [skillsLoaded, setSkillsLoaded] = useState(false);
+  const [showAddSkillTooltip, setShowAddSkillTooltip] = useState(true);
   const chatbotPrompts = [
     '💬 Need guidance? Try our Career Counselor for personalized advice!',
     '🤖 Unsure about your next step? Ask the AI Career Counselor!',
@@ -97,16 +98,27 @@ const Dashboard = () => {
   );
 
   const handleAddSkill = (skill) => {
-    if (!selectedSkills.includes(skill)) {
-      setSelectedSkills([...selectedSkills, skill]);
+    if (!selectedSkills.includes(skill) && !skillsToAcquire.includes(skill)) {
+      const newSelectedSkills = [...selectedSkills, skill];
+      console.log('Skills after adding:', {
+        selectedSkills: newSelectedSkills,
+        skillsToAcquire: skillsToAcquire
+      });
+      setSelectedSkills(newSelectedSkills);
       setSearchTerm('');
       setShowSkillsDropdown(false);
     }
   };
 
   const handleRemoveSkill = (skillToRemove) => {
-    setSelectedSkills(selectedSkills.filter(skill => skill !== skillToRemove));
-    setSkillsToAcquire(skillsToAcquire.filter(skill => skill !== skillToRemove));
+    const newSelectedSkills = selectedSkills.filter(skill => skill !== skillToRemove);
+    const newSkillsToAcquire = skillsToAcquire.filter(skill => skill !== skillToRemove);
+    console.log('Skills after removing:', {
+      selectedSkills: newSelectedSkills,
+      skillsToAcquire: newSkillsToAcquire
+    });
+    setSelectedSkills(newSelectedSkills);
+    setSkillsToAcquire(newSkillsToAcquire);
   };
 
   const handleLogout = async () => {
@@ -188,12 +200,24 @@ const Dashboard = () => {
   const handleToggleSkills = async () => {
     if (!skillsLoaded) {
       await handleLoadSkills();
+      setShowAddSkillTooltip(true);
     } else {
       setSkillsLoaded(false);
       setSelectedSkills([]);
       setSkillsToAcquire([]);
     }
   };
+
+  // Timer for the "Add Skill" tooltip
+  useEffect(() => {
+    let tooltipTimer;
+    if (skillsLoaded && showAddSkillTooltip && !showSkillsDropdown && !showChatbot) {
+      tooltipTimer = setTimeout(() => {
+        setShowAddSkillTooltip(false);
+      }, 5000); // 5 seconds
+    }
+    return () => clearTimeout(tooltipTimer); // Cleanup timer
+  }, [skillsLoaded, showAddSkillTooltip, showSkillsDropdown, showChatbot]);
 
   // Hide dropdown when clicking outside of dropdown or + button
   useEffect(() => {
@@ -212,6 +236,58 @@ const Dashboard = () => {
       return () => document.removeEventListener('mousedown', handleClick);
     }
   }, [showSkillsDropdown]);
+
+  const handleGetCareerRecommendation = async () => {
+    // 1. Combine selectedSkills and skillsToAcquire
+    const combinedSkills = [...selectedSkills, ...skillsToAcquire];
+    // 2. Remove duplicates to get a unique list
+    const uniqueCombinedSkills = [...new Set(combinedSkills)];
+
+    // 3. If the array is empty, do not send any request
+    if (uniqueCombinedSkills.length === 0) {
+      console.log('No skills to send.');
+      return;
+    }
+
+    // 4. Create a JSON object
+    const skillsPayload = { allUserSkills: uniqueCombinedSkills };
+
+    // 5. Convert to JSON string
+    const skillsJSON = JSON.stringify(skillsPayload);
+
+    // 6. Log the JSON string
+    console.log("Sending skills JSON:", skillsJSON);
+
+    // 7. Send to a placeholder IP (using jsonplaceholder for testing)
+    const targetIp = 'https://httpbin.org/post';
+
+    try {
+      const response = await fetch(targetIp, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: skillsJSON,
+      });
+
+      if (!response.ok) {
+        // Handle HTTP errors
+        const errorData = await response.text(); // or response.json() if the error response is JSON
+        console.error('API Error Response:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData}`);
+      }
+
+      const responseData = await response.json(); // Assuming the server responds with JSON
+      console.log('API Success Response:', responseData);
+      // You can do something with responseData here, like showing a success message
+      // alert('Skills submitted successfully! (Check console for details)');
+
+    } catch (error) {
+      console.error('Failed to send skills to API:', error);
+      // You could show an error message to the user here
+      // alert(`Failed to submit skills: ${error.message} (Check console for details)`);
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -239,7 +315,7 @@ const Dashboard = () => {
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '30px', position: 'relative' }}>
                     {rows.map((row, rowIdx) => (
-                      <div key={rowIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div key={rowIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         {row.map(({ skill, type }) => (
                           <div
                             key={skill}
@@ -293,6 +369,139 @@ const Dashboard = () => {
                         ))}
                       </div>
                     ))}
+                    {/* + button and dropdown in a relatively positioned container */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '20px' }}>
+                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <button
+                          ref={plusButtonRef}
+                          onClick={() => setShowSkillsDropdown(!showSkillsDropdown)}
+                          style={{
+                            background: 'transparent',
+                            border: '2px solid #007BFF',
+                            color: isDarkMode ? 'white' : 'black',
+                            fontSize: '1.2rem',
+                            cursor: 'pointer',
+                            padding: '5px 12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '50%',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                            transition: 'all 0.2s',
+                            marginLeft: '5px',
+                          }}
+                          onMouseOver={e => {
+                            const target = e.currentTarget;
+                            target.style.background = isDarkMode ? '#333' : '#e6f0ff';
+                            target.style.borderColor = '#0056b3';
+                          }}
+                          onMouseOut={e => {
+                            const target = e.currentTarget;
+                            target.style.background = 'transparent';
+                            target.style.borderColor = '#007BFF';
+                          }}
+                          aria-label="Add skill"
+                        >
+                          <FaPlus />
+                        </button>
+                        {/* Skills dropdown, absolutely positioned below the + button */}
+                        {showSkillsDropdown && (
+                          <div
+                            ref={dropdownRef}
+                            style={{
+                              position: 'absolute',
+                              top: '120%',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              backgroundColor: isDarkMode ? '#333' : 'white',
+                              border: '1px solid #ccc',
+                              borderRadius: '8px',
+                              padding: '10px',
+                              zIndex: 1000,
+                              width: '300px',
+                              maxHeight: '300px',
+                              overflowY: 'auto',
+                              boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              placeholder="Search skills..."
+                              style={{
+                                width: 'calc(100% - 16px)',
+                                padding: '8px',
+                                marginBottom: '10px',
+                                borderRadius: '4px',
+                                border: '1px solid #ccc',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                              {filteredSkills.map(skill => (
+                                <button
+                                  key={skill}
+                                  onClick={() => handleAddSkill(skill)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '8px',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    color: isDarkMode ? 'white' : 'black',
+                                    borderRadius: '4px'
+                                  }}
+                                  onMouseOver={e => e.currentTarget.style.backgroundColor = isDarkMode ? '#444' : '#f0f0f0'}
+                                  onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                                >
+                                  {skill}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {/* Arrow and tooltip, absolutely positioned to the right of the + button, vertically centered */}
+                        {!showSkillsDropdown && !showChatbot && showAddSkillTooltip && (
+                          <div style={{
+                            position: 'absolute',
+                            left: 'calc(100% + 10px)', // Ensure space from button
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            zIndex: 1100
+                          }}>
+                            <img
+                              src={arrowImg}
+                              alt="arrow"
+                              style={{
+                                width: '38px',
+                                height: '38px',
+                                objectFit: 'contain',
+                                display: 'block',
+                              }}
+                            />
+                            <div style={{
+                              background: isDarkMode ? '#232323' : '#fff',
+                              color: isDarkMode ? 'white' : 'black',
+                              borderRadius: '8px',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.13)',
+                              padding: '8px 16px',
+                              fontSize: '0.95rem',
+                              whiteSpace: 'pre-line',
+                              border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
+                              textAlign: 'left',
+                              lineHeight: 1.4,
+                              marginLeft: '8px',
+                              fontWeight: 'bold'
+                            }}>
+                              {'You can add\nor remove more\nskills here!'}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 );
               })()
@@ -332,6 +541,7 @@ const Dashboard = () => {
                 }}
                 onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
                 onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
+                onClick={handleGetCareerRecommendation}
               >
                 Get Career Recommendation
               </button>
