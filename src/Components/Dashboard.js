@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import './Dashboard.css';
 import { FaChartLine, FaRobot, FaUserGraduate, FaCog, FaCommentDots, FaPlus, FaTimes, FaSpinner } from 'react-icons/fa';
 import SkillSelection from './SkillSelection';
@@ -70,6 +70,11 @@ const Dashboard = () => {
   const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(false);
   const [showCareerModal, setShowCareerModal] = useState(false);
   const [recommendedCareers, setRecommendedCareers] = useState([]);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackError, setFeedbackError] = useState("");
+  const [feedbackSuccess, setFeedbackSuccess] = useState("");
+  const [showFeedbackPrompt, setShowFeedbackPrompt] = useState(true);
   const chatbotPrompts = [
     '💬 Need guidance? Try our Career Counselor for personalized advice!',
     '🤖 Unsure about your next step? Ask the AI Career Counselor!',
@@ -317,7 +322,41 @@ const Dashboard = () => {
     }
   };
   
-  
+  const handleFeedbackSubmit = async () => {
+    setFeedbackError("");
+    setFeedbackSuccess("");
+    const wordCount = feedbackText.trim().split(/\s+/).length;
+    if (wordCount > 200) {
+      setFeedbackError("Feedback must be 200 words or less.");
+      return;
+    }
+    if (!feedbackText.trim()) {
+      setFeedbackError("Feedback cannot be empty.");
+      return;
+    }
+    if (!auth.currentUser) {
+      setFeedbackError("You must be logged in to submit feedback.");
+      return;
+    }
+    try {
+      await addDoc(collection(db, "feedbacks"), {
+        userId: auth.currentUser.uid,
+        feedback: feedbackText.trim(),
+        timestamp: serverTimestamp(),
+      });
+      setFeedbackSuccess("Thank you for your feedback!");
+      setFeedbackText("");
+      setTimeout(() => setShowFeedbackModal(false), 1500);
+    } catch (err) {
+      setFeedbackError("Failed to submit feedback. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    if (!showFeedbackPrompt) return;
+    const timer = setTimeout(() => setShowFeedbackPrompt(false), 10000);
+    return () => clearTimeout(timer);
+  }, [showFeedbackPrompt]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -783,6 +822,143 @@ const Dashboard = () => {
               })}
             </ul>
           </div>
+        </div>
+      )}
+
+      {/* Feedback Button and Modal */}
+      <button
+        style={{
+          position: 'fixed',
+          bottom: 32,
+          left: 80,
+          zIndex: 2100,
+          background: '#007BFF',
+          color: 'white',
+          border: 'none',
+          borderRadius: '50%',
+          width: 56,
+          height: 56,
+          fontSize: 28,
+          cursor: 'pointer',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.13)'
+        }}
+        onClick={() => setShowFeedbackModal(true)}
+        aria-label="Feedback"
+      >
+        💬
+      </button>
+      {showFeedbackModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 2200,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(2px)'
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            padding: '32px 24px 24px 24px',
+            minWidth: '320px',
+            maxWidth: '90vw',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+            position: 'relative',
+            color: 'black',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch'
+          }}>
+            <button
+              onClick={() => setShowFeedbackModal(false)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 16,
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: '#888'
+              }}
+              aria-label="Close Feedback"
+            >×</button>
+            <h2 style={{marginTop: 0, marginBottom: 16, color: '#007BFF'}}>Your Feedback</h2>
+            <textarea
+              value={feedbackText}
+              onChange={e => setFeedbackText(e.target.value)}
+              rows={6}
+              maxLength={2000}
+              placeholder="Type your feedback here (max 200 words)..."
+              style={{
+                resize: 'vertical',
+                padding: 12,
+                borderRadius: 8,
+                border: '1px solid #ccc',
+                fontSize: '1rem',
+                marginBottom: 12
+              }}
+            />
+            <div style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>
+              {feedbackText.trim().split(/\s+/).filter(Boolean).length} / 200 words
+            </div>
+            {feedbackError && <div style={{ color: 'red', marginBottom: 8 }}>{feedbackError}</div>}
+            {feedbackSuccess && <div style={{ color: 'green', marginBottom: 8 }}>{feedbackSuccess}</div>}
+            <button
+              onClick={handleFeedbackSubmit}
+              style={{
+                background: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 0',
+                fontSize: '1.1rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                marginTop: 8
+              }}
+            >
+              Submit Feedback
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Floating Prompt */}
+      {showFeedbackPrompt && (
+        <div
+          style={{
+            position: 'fixed',
+            left: 150, // adjust as needed
+            bottom: 40,
+            zIndex: 2100,
+            background: '#fff',
+            color: '#222',
+            borderRadius: 12,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.13)',
+            padding: '10px 18px',
+            minWidth: 160,
+            fontSize: '0.98rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          <span style={{ fontWeight: 500 }}>Your feedback is greatly appreciated!</span>
+          <button
+            onClick={() => setShowFeedbackPrompt(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#888',
+              fontSize: '1.1rem',
+              marginLeft: 4,
+              cursor: 'pointer'
+            }}
+            aria-label="Close feedback prompt"
+          >×</button>
         </div>
       )}
     </div>
