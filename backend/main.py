@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from model_randomForest.check_randomforest import predict_careers_from_skills
 
 app = FastAPI(title="Forecast API")
 
@@ -38,6 +39,9 @@ class ForecastResponse(BaseModel):
     value: float
     lower_ci: float
     upper_ci: float
+
+class CareerPredictRequest(BaseModel):
+    allUserSkills: List[str]
 
 # Helpers
 def load_arima_model(skill: str):
@@ -161,6 +165,11 @@ async def forecast(request: ForecastRequest):
     # --- Invalid Mode ---
     else:
         raise HTTPException(status_code=400, detail="Invalid mode. Use 'arima' or 'nbeats'.")
+
+@app.post("/predict-careers/")
+async def predict_careers(request: CareerPredictRequest):
+    result = predict_careers_from_skills(request.allUserSkills)
+    return result
 
 # Frontend route
 build_path = os.path.join(os.path.dirname(__file__), "build")

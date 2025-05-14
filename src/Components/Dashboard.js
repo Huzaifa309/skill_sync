@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import './Dashboard.css';
-import { FaChartLine, FaRobot, FaUserGraduate, FaCog, FaCommentDots, FaPlus, FaTimes } from 'react-icons/fa';
+import { FaChartLine, FaRobot, FaUserGraduate, FaCog, FaCommentDots, FaPlus, FaTimes, FaSpinner } from 'react-icons/fa';
 import SkillSelection from './SkillSelection';
 import ProfileManagement from './Profile';
 import Chatbot from './Chatbot';
@@ -12,6 +12,46 @@ import PredictArima from './predict_arima';
 import PredictNBeats from './predict_nbeats';
 import { ThemeContext } from '../context/ThemeContext';
 import arrowImg from '../assets/images/arrowimg.png';
+
+const CAREER_LABELS = {
+  ".netdeveloper": ".NET Developer",
+  ".netsqldeveloper": ".NET SQL Developer",
+  "ai": "AI Specialist",
+  "aiengineer": "AI Engineer",
+  "aimlengineer": "AI/ML Engineer",
+  "airesearcher": "AI Researcher",
+  "applicationsecurity": "Application Security Specialist",
+  "azuredevopsengineer": "Azure DevOps Engineer",
+  "c++programmer": "C++ Programmer",
+  "crmspecialist": "CRM Specialist",
+  "cybersecurityconsultant": "Cybersecurity Consultant",
+  "cybersecurityengineer": "Cybersecurity Engineer",
+  "cybersecurityoperationsengineer": "Cybersecurity Operations Engineer",
+  "cybersecurityspecialist": "Cybersecurity Specialist",
+  "datascience": "Data Science Specialist",
+  "datascientist": "Data Scientist",
+  "devopsengineer": "DevOps Engineer",
+  "digitaldesigner": "Digital Designer",
+  "embeddedsystemsprogrammer": "Embedded Systems Programmer",
+  "erplaraveldeveloper": "ERP Laravel Developer",
+  "fluttermobiledeveloper": "Flutter Mobile Developer",
+  "frontenddevelopers": "Frontend Developer",
+  "fullstackdeveloperjavacripttypescript": "Full Stack Developer (JavaScript/TypeScript)",
+  "fullstackengineerpython": "Full Stack Engineer (Python)",
+  "gameprogrammer": "Game Programmer",
+  "graphicdesigner": "Graphic Designer",
+  "iosdeveloper": "iOS Developer",
+  "mobileappdeveloper": "Mobile App Developer",
+  "networkadministrator": "Network Administrator",
+  "networkoperationengineer": "Network Operation Engineer",
+  "securityoperationscenteranalyst": "Security Operations Center Analyst",
+  "softwareengineer": "Software Engineer",
+  "unity3dprogrammer": "Unity 3D Programmer",
+  "unityar": "Unity AR Developer",
+  "unrealenginedeveloper": "Unreal Engine Developer",
+  "visualdesigner": "Visual Designer",
+  "webdeveloper": "Web Developer"
+};
 
 const Dashboard = () => {
   const [userName, setUserName] = useState('User');
@@ -27,6 +67,9 @@ const Dashboard = () => {
   const [promptIndex, setPromptIndex] = useState(0);
   const [skillsLoaded, setSkillsLoaded] = useState(false);
   const [showAddSkillTooltip, setShowAddSkillTooltip] = useState(true);
+  const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(false);
+  const [showCareerModal, setShowCareerModal] = useState(false);
+  const [recommendedCareers, setRecommendedCareers] = useState([]);
   const chatbotPrompts = [
     '💬 Need guidance? Try our Career Counselor for personalized advice!',
     '🤖 Unsure about your next step? Ask the AI Career Counselor!',
@@ -238,56 +281,43 @@ const Dashboard = () => {
   }, [showSkillsDropdown]);
 
   const handleGetCareerRecommendation = async () => {
-    // 1. Combine selectedSkills and skillsToAcquire
+    setIsLoadingRecommendation(true);
     const combinedSkills = [...selectedSkills, ...skillsToAcquire];
-    // 2. Remove duplicates to get a unique list
     const uniqueCombinedSkills = [...new Set(combinedSkills)];
-
-    // 3. If the array is empty, do not send any request
+  
     if (uniqueCombinedSkills.length === 0) {
       console.log('No skills to send.');
+      setIsLoadingRecommendation(false);
       return;
     }
-
-    // 4. Create a JSON object
-    const skillsPayload = { allUserSkills: uniqueCombinedSkills };
-
-    // 5. Convert to JSON string
-    const skillsJSON = JSON.stringify(skillsPayload);
-
-    // 6. Log the JSON string
-    console.log("Sending skills JSON:", skillsJSON);
-
-    // 7. Send to a placeholder IP (using jsonplaceholder for testing)
-    const targetIp = 'https://httpbin.org/post';
-
+  
     try {
-      const response = await fetch(targetIp, {
+      const response = await fetch('/predict-careers/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: skillsJSON,
+        body: JSON.stringify({ allUserSkills: uniqueCombinedSkills })
       });
-
-      if (!response.ok) {
-        // Handle HTTP errors
-        const errorData = await response.text(); // or response.json() if the error response is JSON
-        console.error('API Error Response:', errorData);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData}`);
-      }
-
-      const responseData = await response.json(); // Assuming the server responds with JSON
-      console.log('API Success Response:', responseData);
-      // You can do something with responseData here, like showing a success message
-      // alert('Skills submitted successfully! (Check console for details)');
-
-    } catch (error) {
-      console.error('Failed to send skills to API:', error);
-      // You could show an error message to the user here
-      // alert(`Failed to submit skills: ${error.message} (Check console for details)`);
+  
+      if (!response.ok) throw new Error('Career prediction API error');
+  
+      const result = await response.json();
+      console.log('🎯 Career Recommendations:', result);
+  
+      // Show top 5 with scores from all_predictions
+      const topCareers = result.all_predictions ? result.all_predictions.slice(0, 5) : [];
+      setRecommendedCareers(topCareers.map(([career]) => CAREER_LABELS[career] || career));
+      setShowCareerModal(true);
+    } catch (err) {
+      console.error('Career prediction failed:', err);
+      // Optionally show an error modal or message
+    } finally {
+      setIsLoadingRecommendation(false);
     }
   };
+  
+  
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -525,26 +555,32 @@ const Dashboard = () => {
               {skillsLoaded ? 'Close Skills' : 'Load all your skills (current & to acquire)'}
             </button>
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-              <button 
-                style={{
-                  padding: '15px 30px',
-                  fontSize: '1.1rem',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  transition: 'all 0.3s ease',
-                  minWidth: '320px',
-                  fontWeight: 500
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
-                onClick={handleGetCareerRecommendation}
-              >
-                Get Career Recommendation
-              </button>
+              {isLoadingRecommendation ? (
+                <div style={{ minWidth: 60, minHeight: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FaSpinner className="fa-spin" size={32} color="#28a745" />
+                </div>
+              ) : (
+                <button 
+                  style={{
+                    padding: '15px 30px',
+                    fontSize: '1.1rem',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                    minWidth: '320px',
+                    fontWeight: 500
+                  }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
+                  onClick={handleGetCareerRecommendation}
+                >
+                  Get Career Recommendation
+                </button>
+              )}
             </div>
           </div>
         );
@@ -696,6 +732,59 @@ const Dashboard = () => {
       </div>
 
       {showChatbot && <Chatbot onClose={() => setShowChatbot(false)} userDetails={userDetails} />}
+
+      {showCareerModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(2px)'
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '12px',
+            padding: '32px 24px 24px 24px',
+            minWidth: '320px',
+            maxWidth: '90vw',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+            position: 'relative',
+            color: 'black'
+          }}>
+            <button
+              onClick={() => setShowCareerModal(false)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 16,
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: '#888'
+              }}
+              aria-label="Close"
+            >×</button>
+            <h2 style={{marginTop: 0, marginBottom: 16, color: 'black'}}>Recommender Says:</h2>
+            <ul style={{paddingLeft: 0, listStyle: 'none', margin: 0}}>
+              {recommendedCareers.map((career, idx) => {
+                let color = 'black';
+                if (idx === 0) color = 'red';
+                else if (idx === 1) color = 'green';
+                else if (idx === 2) color = 'blue';
+                return (
+                  <li key={career} style={{marginBottom: 8, fontSize: '1.1rem', fontWeight: 500, color}}>
+                    - {career}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
