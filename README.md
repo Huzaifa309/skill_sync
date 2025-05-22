@@ -1,16 +1,8 @@
-# Introduction
+Skill's Sync – Your AI-Powered Career Navigator
 
-This is our FYP website, Skill's Sync which is basically an AI based Career Counselor, made using React JS and Firebase.
+**Feeling lost in the sea of skills and career choices? Let Skill's Sync be your compass.**
+Skill's Sync is an AI-driven career recommendation platform that bridges the gap between what you know and where you can go. By analyzing your current skillset, we forecast your ideal career paths and recommend trending, in-demand roles tailored just for you.
 
-## What is done 
+Built with powerful machine learning models like ARIMA and N-BEATS for skill trend prediction, and enriched with a smart classifier for career mapping, Skill's Sync personalizes your career journey like never before.
 
-Profile Management, Dynamic Skill Management 2 iterations and Virtual Career Counselor 1 iterations are done.
-
-### What is pending
-
-Implementation of AI model 
-Predictive analysis as well as AI based Career Recommendation is pending
-
-### How to check
-
-Clone this repo, initialize Node js and then run npm start
+Whether you're a student planning your future or a professional looking to pivot, **Skill's Sync aligns your skills with success.**
